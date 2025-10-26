@@ -25,6 +25,7 @@ export default function SignupScreen() {
   const [company, setCompany] = useState('');
   const [jobTitle, setJobTitle] = useState('');
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const validateForm = () => {
     if (!firstName.trim()) {
