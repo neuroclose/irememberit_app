@@ -350,7 +350,7 @@ class ApiService {
   }
 
   async markAnnouncementRead(announcementId: string) {
-    const response = await this.api.post(`/announcements/${announcementId}/mark-read`);
+    const response = await this.api.post(`/proxy/announcements/${announcementId}/mark-read`);
     return response.data;
   }
 
