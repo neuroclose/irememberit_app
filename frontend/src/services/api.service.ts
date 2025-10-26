@@ -187,8 +187,25 @@ class ApiService {
     const response = await this.api.get('/mobile/sync/initial');
     console.log('[API] Sync data received:', response.data);
     console.log('[API] Sync user data:', response.data?.user);
+    console.log('[API] Sync organization data:', response.data?.organization);
     console.log('[API] User has company?', response.data?.user?.company);
     console.log('[API] User has jobTitle?', response.data?.user?.jobTitle);
+    
+    // For organization users, prioritize organization tier over user tier
+    if (response.data?.user && response.data?.organization) {
+      console.log('[API] Organization user detected - using org tier');
+      console.log('[API] User tier:', response.data.user.tier);
+      console.log('[API] Organization tier:', response.data.organization.tier);
+      
+      // Update user object with organization tier
+      response.data.user = {
+        ...response.data.user,
+        tier: response.data.organization.tier || response.data.user.tier,
+        subscriptionStatus: response.data.organization.subscriptionStatus || response.data.user.subscriptionStatus
+      };
+      console.log('[API] Updated user tier to:', response.data.user.tier);
+    }
+    
     return response.data;
   }
 
