@@ -7,6 +7,9 @@ export interface User {
   organizationId?: string;
   organization?: Organization;
   tier: string;
+  subscriptionStatus?: string;
+  subscriptionType?: string;
+  stripeSubscriptionId?: string;
   totalPoints: number;
   rank?: string;
   profileImageUrl?: string;
