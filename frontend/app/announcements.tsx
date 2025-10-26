@@ -34,7 +34,7 @@ export default function AnnouncementsScreen() {
   });
 
   const handleAnnouncementPress = (announcement: any) => {
-    if (!announcement.read) {
+    if (!announcement.userAnnouncement?.hasRead) {
       markReadMutation.mutate(announcement.id);
     }
   };
