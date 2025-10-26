@@ -3,6 +3,44 @@
 ## Overview
 This document explains how subscription tier and status information flows from the web API to the mobile app for both standalone and organization users.
 
+## ⚠️ CRITICAL ISSUE IDENTIFIED
+
+### The Problem
+**Organization subscriptions are stored in the USER table, not the ORGANIZATION table!**
+
+Based on the logs:
+- User record: `tier: 'enterprise'`, `subscriptionStatus: 'promo_trial'` ✅
+- Organization record: `tier: 'free'`, `subscriptionStatus: 'active'` ❌
+
+**Why This Happens:**
+When a promo code is applied to an organization admin:
+1. ✅ The USER record gets updated with the new tier
+2. ❌ The ORGANIZATION record does NOT get updated
+
+### The Fix Required (Web API Side)
+
+You need to run this SQL on your web API database:
+
+```sql
+UPDATE organizations 
+SET 
+  tier = 'enterprise',
+  subscriptionStatus = 'promo_trial',
+  usedPromoCode = 'YOUR_PROMO_CODE_HERE'
+WHERE id = '8400555c-14f4-426c-a0d0-25e5f3b5dc61';
+```
+
+**OR** you need to update your web API's promo code application logic to also update the organization record when applied by an organization admin.
+
+## Current Mobile App Workaround
+
+Since the organization endpoint doesn't return the correct tier, the mobile app now uses the **user's tier** from the sync data for organization users as a temporary workaround.
+
+This means:
+- Organization users will see THEIR user tier (which gets updated with promo codes)
+- This works correctly for now, but isn't the proper architecture
+- The proper fix is to update the organization record in the database
+
 ## Data Sources
 
 ### Standalone Users
