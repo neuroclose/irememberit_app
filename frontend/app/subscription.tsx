@@ -198,12 +198,47 @@ export default function SubscriptionScreen() {
   };
 
   // Fetch current subscription
-  const { data: subscription, isLoading } = useQuery({
+  const { data: subscription, isLoading, refetch: refetchSubscription } = useQuery({
     queryKey: ['subscription'],
     queryFn: async () => {
       try {
         const data = await apiService.getCurrentSubscription();
         console.log('[Subscription] API response:', JSON.stringify(data, null, 2));
+        
+        // Update user tier from subscription data if available
+        if (data?.subscription) {
+          const subscriptionData = data.subscription;
+          let updatedTier = user?.tier;
+          let updatedStatus = user?.subscriptionStatus;
+          
+          // For organization subscriptions
+          if (subscriptionData.organization) {
+            updatedTier = subscriptionData.organization.tier || updatedTier;
+            updatedStatus = subscriptionData.organization.subscriptionStatus || updatedStatus;
+          }
+          // For user subscriptions
+          else if (subscriptionData.user) {
+            updatedTier = subscriptionData.user.tier || updatedTier;
+            updatedStatus = subscriptionData.user.subscriptionStatus || updatedStatus;
+          }
+          
+          // Update user in store if tier or status changed
+          if (updatedTier !== user?.tier || updatedStatus !== user?.subscriptionStatus) {
+            const updatedUser = {
+              ...user,
+              tier: updatedTier,
+              subscriptionStatus: updatedStatus
+            };
+            console.log('[Subscription] Updating user from subscription data:', {
+              oldTier: user?.tier,
+              newTier: updatedTier,
+              oldStatus: user?.subscriptionStatus,
+              newStatus: updatedStatus
+            });
+            useAuthStore.getState().setUser(updatedUser);
+          }
+        }
+        
         return data;
       } catch (error) {
         console.log('[Subscription] Endpoint not available, using user tier data');
@@ -211,7 +246,7 @@ export default function SubscriptionScreen() {
       }
     },
     retry: false,
-    enabled: false, // Disable this query since endpoint doesn't exist yet
+    enabled: true, // Enable to fetch subscription data
   });
 
   // Create checkout mutation
