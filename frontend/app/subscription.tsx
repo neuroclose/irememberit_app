@@ -143,34 +143,56 @@ export default function SubscriptionScreen() {
       console.log('[Subscription] User ID:', user?.id);
       console.log('[Subscription] Organization ID:', user?.organizationId);
       
-      // NOTE: We always fetch from the user endpoint because the web API's 
-      // organization record doesn't get updated with promo code subscriptions.
-      // The user record is the source of truth for subscriptions.
-      
       let updatedUserData = null;
       
-      console.log('[Subscription] Fetching user subscription data...');
-      try {
-        const userData = await apiService.getCurrentUser();
-        console.log('[Subscription] User data received:', JSON.stringify(userData, null, 2));
-        
-        // Use the fresh user data with tier from their subscription
-        updatedUserData = userData;
-        
-        console.log('[Subscription] User tier:', updatedUserData.tier);
-        console.log('[Subscription] Subscription status:', updatedUserData.subscriptionStatus);
-      } catch (error: any) {
-        console.error('[Subscription] Failed to get user data:', error.message);
-        console.log('[Subscription] Attempting fallback to sync endpoint...');
-        
-        // Fallback to sync endpoint
+      if (hasOrganization) {
+        // ORGANIZATION USERS: Fetch organization subscription data
+        console.log('[Subscription] Fetching organization subscription...');
         try {
-          const syncData = await apiService.getInitialSync();
-          console.log('[Subscription] Sync data received:', JSON.stringify(syncData, null, 2));
-          updatedUserData = syncData.user;
-        } catch (syncError: any) {
-          console.error('[Subscription] Sync fallback also failed:', syncError.message);
-          updatedUserData = user; // Keep existing data
+          const orgData = await apiService.getOrganization();
+          console.log('[Subscription] Organization data received:', JSON.stringify(orgData, null, 2));
+          
+          // Organization users get tier and status from organization
+          updatedUserData = { 
+            ...user, 
+            tier: orgData.tier || 'free',
+            subscriptionStatus: orgData.subscriptionStatus || 'active',
+            stripeCustomerId: orgData.stripeCustomerId || null,
+            stripeSubscriptionId: orgData.stripeSubscriptionId || null
+          };
+          
+          console.log('[Subscription] Organization user updated with org tier:', updatedUserData.tier);
+          console.log('[Subscription] Organization subscriptionStatus:', updatedUserData.subscriptionStatus);
+        } catch (error: any) {
+          console.error('[Subscription] Failed to get organization data:', error.message);
+          // Keep existing user data if org fetch fails
+          updatedUserData = user;
+        }
+      } else {
+        // STANDALONE USERS: Fetch individual user subscription data
+        console.log('[Subscription] Fetching standalone user subscription...');
+        try {
+          const userData = await apiService.getCurrentUser();
+          console.log('[Subscription] Standalone user data received:', JSON.stringify(userData, null, 2));
+          
+          // Use the fresh user data with tier from their individual subscription
+          updatedUserData = userData;
+          
+          console.log('[Subscription] Standalone user tier:', updatedUserData.tier);
+          console.log('[Subscription] Standalone subscriptionStatus:', updatedUserData.subscriptionStatus);
+        } catch (error: any) {
+          console.error('[Subscription] Failed to get user data:', error.message);
+          console.log('[Subscription] Attempting fallback to sync endpoint...');
+          
+          // Fallback to sync endpoint
+          try {
+            const syncData = await apiService.getInitialSync();
+            console.log('[Subscription] Sync data received:', JSON.stringify(syncData, null, 2));
+            updatedUserData = syncData.user;
+          } catch (syncError: any) {
+            console.error('[Subscription] Sync fallback also failed:', syncError.message);
+            updatedUserData = user; // Keep existing data
+          }
         }
       }
       
