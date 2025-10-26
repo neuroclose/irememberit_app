@@ -16,6 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { apiService } from '../../src/services/api.service';
 
 export default function SignupScreen() {
+  const scrollViewRef = useRef<ScrollView>(null);
   const [accountType, setAccountType] = useState<'personal' | 'team'>('personal');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
