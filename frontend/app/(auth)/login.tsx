@@ -73,13 +73,25 @@ export default function LoginScreen() {
       router.replace('/(tabs)/home');
     } catch (error: any) {
       console.error('Login error:', error);
-      console.error('Error details:', JSON.stringify(error, null, 2));
+      console.error('Error response:', error.response);
+      console.error('Error message:', error.message);
       
       // Get error message from various possible locations
-      const errorMessage = error.response?.data?.message || 
-                          error.response?.data?.error || 
-                          error.message || 
-                          '';
+      let errorMessage = '';
+      
+      if (error.response?.data?.detail) {
+        errorMessage = error.response.data.detail;
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error.message) {
+        errorMessage = error.message;
+      } else {
+        errorMessage = 'Invalid email or password. Please try again.';
+      }
+      
+      console.log('Final error message to display:', errorMessage);
       
       const errorLower = errorMessage.toLowerCase();
       
@@ -105,10 +117,16 @@ export default function LoginScreen() {
             },
           ]
         );
+      } else if (error.response?.status === 401) {
+        // Unauthorized - wrong credentials
+        Alert.alert(
+          'Login Failed',
+          'Invalid email or password. Please check your credentials and try again.'
+        );
       } else {
         Alert.alert(
           'Login Failed',
-          errorMessage || 'Unable to login. Please try again.'
+          errorMessage || 'Unable to login. Please check your credentials and try again.'
         );
       }
     } finally {
