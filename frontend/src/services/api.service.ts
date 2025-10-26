@@ -191,20 +191,24 @@ class ApiService {
     console.log('[API] User has company?', response.data?.user?.company);
     console.log('[API] User has jobTitle?', response.data?.user?.jobTitle);
     
+    // NOTE: Organization tier merging is DISABLED because the web API's organization
+    // record doesn't get updated when promo codes are applied. The user record is 
+    // the source of truth for now.
+    //
     // For organization users, prioritize organization tier over user tier
-    if (response.data?.user && response.data?.organization) {
-      console.log('[API] Organization user detected - using org tier');
-      console.log('[API] User tier:', response.data.user.tier);
-      console.log('[API] Organization tier:', response.data.organization.tier);
-      
-      // Update user object with organization tier
-      response.data.user = {
-        ...response.data.user,
-        tier: response.data.organization.tier || response.data.user.tier,
-        subscriptionStatus: response.data.organization.subscriptionStatus || response.data.user.subscriptionStatus
-      };
-      console.log('[API] Updated user tier to:', response.data.user.tier);
-    }
+    // if (response.data?.user && response.data?.organization) {
+    //   console.log('[API] Organization user detected - using org tier');
+    //   console.log('[API] User tier:', response.data.user.tier);
+    //   console.log('[API] Organization tier:', response.data.organization.tier);
+    //   
+    //   // Update user object with organization tier
+    //   response.data.user = {
+    //     ...response.data.user,
+    //     tier: response.data.organization.tier || response.data.user.tier,
+    //     subscriptionStatus: response.data.organization.subscriptionStatus || response.data.user.subscriptionStatus
+    //   };
+    //   console.log('[API] Updated user tier to:', response.data.user.tier);
+    // }
     
     return response.data;
   }
