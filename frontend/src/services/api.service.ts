@@ -34,8 +34,12 @@ class ApiService {
       async (error: AxiosError) => {
         const originalRequest: any = error.config;
 
-        // If error is 401 and we haven't tried to refresh yet
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        // Don't try to refresh token for auth endpoints (login, signup, etc.)
+        const authEndpoints = ['/mobile/auth/login', '/mobile/auth/signup', '/auth/login', '/auth/signup'];
+        const isAuthEndpoint = authEndpoints.some(endpoint => originalRequest.url?.includes(endpoint));
+
+        // If error is 401 and we haven't tried to refresh yet, and it's NOT an auth endpoint
+        if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
           if (this.isRefreshing) {
             // If already refreshing, queue this request
             return new Promise((resolve, reject) => {
