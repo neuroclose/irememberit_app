@@ -147,6 +147,12 @@ export default function SignupScreen() {
         </View>
 
         <View style={styles.form}>
+          {errorMessage ? (
+            <View style={styles.errorContainer}>
+              <Text style={styles.errorText}>{errorMessage}</Text>
+            </View>
+          ) : null}
+          
           {/* Account Type Selection */}
           <Text style={styles.sectionTitle}>Account Type</Text>
           <View style={styles.accountTypeContainer}>
