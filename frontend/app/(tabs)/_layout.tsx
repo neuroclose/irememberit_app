@@ -47,19 +47,15 @@ export default function TabsLayout() {
           backgroundColor: '#1e293b',
           borderTopColor: '#334155',
           borderTopWidth: 1,
-          height: 70,
-          paddingBottom: 10,
-          paddingTop: 10,
+          height: 60,
+          paddingBottom: 8,
+          paddingTop: 8,
         },
         tabBarActiveTintColor: '#6366f1',
         tabBarInactiveTintColor: '#64748b',
-        tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: '600',
-          marginBottom: 4,
-        },
+        tabBarShowLabel: false,
         tabBarIconStyle: {
-          marginTop: 4,
+          marginTop: 0,
         },
       }}
     >
