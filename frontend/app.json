@@ -1,0 +1,40 @@
+{
+  "expo": {
+    "name": "iRememberIT",
+    "slug": "irememberit",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "irememberit",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.neroclose.irememberit"
+    },
+    "android": {
+      "package": "com.neroclose.irememberit",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#FF9F40"
+      },
+      "edgeToEdgeEnabled": true
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "splash": {
+      "image": "./assets/images/splash-screen.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1a1d29"
+    },
+    "plugins": [
+      "expo-router"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

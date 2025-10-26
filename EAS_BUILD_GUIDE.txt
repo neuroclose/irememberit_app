@@ -1,0 +1,572 @@
+═══════════════════════════════════════════════════════════════════════════════
+  iRememberIT - EAS Build & Deployment Guide
+  Complete Guide for Building iOS and Android Apps
+═══════════════════════════════════════════════════════════════════════════════
+
+TABLE OF CONTENTS
+─────────────────
+1. Prerequisites
+2. Initial EAS Setup
+3. Configuration Files
+4. Environment Variables
+5. Building for iOS
+6. Building for Android
+7. App Store Submission
+8. Troubleshooting
+9. Common Issues & Solutions
+
+═══════════════════════════════════════════════════════════════════════════════
+1. PREREQUISITES
+═══════════════════════════════════════════════════════════════════════════════
+
+Required Accounts:
+──────────────────
+✓ Expo Account (https://expo.dev)
+✓ Apple Developer Account ($99/year) - for iOS
+✓ Google Play Console Account ($25 one-time) - for Android
+
+Required Software:
+──────────────────
+✓ Node.js (v18 or higher)
+✓ npm or yarn
+✓ EAS CLI installed globally: npm install -g eas-cli
+
+System Requirements:
+─────────────────────
+✓ macOS (for iOS development and testing)
+✓ Xcode (latest version) - for iOS
+✓ Android Studio - for Android testing (optional)
+
+═══════════════════════════════════════════════════════════════════════════════
+2. INITIAL EAS SETUP
+═══════════════════════════════════════════════════════════════════════════════
+
+Step 1: Login to Expo
+──────────────────────
+cd /app/frontend
+eas login
+
+Enter your Expo credentials when prompted.
+
+Step 2: Configure Project
+──────────────────────────
+eas build:configure
+
+This will:
+- Create or update eas.json
+- Link project to your Expo account
+- Set up build profiles
+
+Step 3: Update app.json
+────────────────────────
+Ensure these fields are properly set in frontend/app.json:
+
+{
+  "expo": {
+    "name": "iRememberIT",
+    "slug": "irememberit",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "irememberit",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/images/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0f172a"
+    },
+    "ios": {
+      "bundleIdentifier": "com.yourcompany.irememberit",
+      "buildNumber": "1",
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app uses the camera for profile photos.",
+        "NSMicrophoneUsageDescription": "This app uses the microphone for voice learning sessions."
+      }
+    },
+    "android": {
+      "package": "com.yourcompany.irememberit",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#0f172a"
+      },
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.CAMERA"
+      ]
+    },
+    "extra": {
+      "eas": {
+        "projectId": "YOUR_PROJECT_ID_HERE"
+      }
+    }
+  }
+}
+
+IMPORTANT: Replace these values:
+- "com.yourcompany.irememberit" with your actual bundle identifier
+- "YOUR_PROJECT_ID_HERE" with your EAS project ID (get from expo.dev)
+
+═══════════════════════════════════════════════════════════════════════════════
+3. CONFIGURATION FILES
+═══════════════════════════════════════════════════════════════════════════════
+
+eas.json Configuration
+───────────────────────
+Create or update frontend/eas.json:
+
+{
+  "cli": {
+    "version": ">= 5.0.0"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": {
+        "simulator": true
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "ios": {
+        "simulator": false
+      },
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "production": {
+      "ios": {
+        "simulator": false
+      },
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "env": {
+        "EXPO_PUBLIC_BACKEND_URL": "https://your-production-backend.com"
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "appleId": "your-apple-id@email.com",
+        "ascAppId": "your-app-store-connect-id",
+        "appleTeamId": "your-team-id"
+      },
+      "android": {
+        "serviceAccountKeyPath": "./google-service-account.json",
+        "track": "internal"
+      }
+    }
+  }
+}
+
+Build Profiles Explained:
+─────────────────────────
+- development: For testing with Expo Go or development builds
+- preview: For internal testing (TestFlight, internal tracks)
+- production: For App Store and Google Play releases
+
+═══════════════════════════════════════════════════════════════════════════════
+4. ENVIRONMENT VARIABLES
+═══════════════════════════════════════════════════════════════════════════════
+
+EAS Secrets (Recommended Method)
+─────────────────────────────────
+Store sensitive data securely using EAS Secrets:
+
+eas secret:create --scope project --name EXPO_PUBLIC_BACKEND_URL --value "https://api.yourbackend.com" --type string
+eas secret:create --scope project --name EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY --value "pk_live_..." --type string
+
+List all secrets:
+eas secret:list
+
+Delete a secret:
+eas secret:delete --name SECRET_NAME
+
+Alternative: .env Files
+────────────────────────
+For non-sensitive config, update frontend/.env:
+
+EXPO_PUBLIC_BACKEND_URL=https://api.yourbackend.com
+EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_your_key_here
+
+Note: All EXPO_PUBLIC_* variables are embedded in the app binary.
+Never put sensitive keys (API secrets) in EXPO_PUBLIC_* variables!
+
+═══════════════════════════════════════════════════════════════════════════════
+5. BUILDING FOR iOS
+═══════════════════════════════════════════════════════════════════════════════
+
+Prerequisites for iOS
+──────────────────────
+1. Apple Developer Account enrolled
+2. Bundle Identifier registered in Apple Developer Portal
+3. App Store Connect app created
+
+Step 1: Create Apple Credentials
+─────────────────────────────────
+Option A - Let EAS manage credentials (Recommended):
+eas credentials
+
+Option B - Manual credential management:
+- Generate certificates via Apple Developer Portal
+- Download provisioning profiles
+- Upload to EAS
+
+Step 2: Build for iOS Simulator (Testing)
+──────────────────────────────────────────
+cd /app/frontend
+eas build --platform ios --profile development
+
+This creates a build you can test in Xcode Simulator.
+
+Step 3: Build for TestFlight (Internal Testing)
+────────────────────────────────────────────────
+eas build --platform ios --profile preview
+
+Download the build and upload to TestFlight manually, or use:
+eas submit --platform ios --profile preview
+
+Step 4: Build for Production (App Store)
+─────────────────────────────────────────
+eas build --platform ios --profile production
+
+This creates an .ipa file ready for App Store submission.
+
+Step 5: Submit to App Store
+────────────────────────────
+eas submit --platform ios --profile production --latest
+
+You'll be prompted for:
+- Apple ID
+- App-specific password (create at appleid.apple.com)
+- App Store Connect app ID
+
+═══════════════════════════════════════════════════════════════════════════════
+6. BUILDING FOR ANDROID
+═══════════════════════════════════════════════════════════════════════════════
+
+Prerequisites for Android
+──────────────────────────
+1. Google Play Console account
+2. App created in Google Play Console
+3. Package name registered
+
+Step 1: Generate Keystore
+──────────────────────────
+EAS can auto-generate and manage your keystore:
+
+eas credentials
+
+Select Android → Production → Generate new keystore
+
+Or create manually:
+keytool -genkeypair -v -storetype PKCS12 -keystore my-release-key.keystore \
+  -alias my-key-alias -keyalg RSA -keysize 2048 -validity 10000
+
+Step 2: Build APK (Testing)
+────────────────────────────
+cd /app/frontend
+eas build --platform android --profile preview
+
+This creates an APK you can install on devices for testing.
+
+Step 3: Build AAB (Production)
+───────────────────────────────
+eas build --platform android --profile production
+
+This creates an App Bundle (.aab) for Google Play Store.
+
+Step 4: Submit to Google Play
+──────────────────────────────
+First, create a service account in Google Cloud Console:
+1. Go to Google Cloud Console
+2. Create service account with "Service Account User" role
+3. Download JSON key file
+4. Upload to Play Console (Settings → API access)
+
+Save the JSON file as: frontend/google-service-account.json
+
+Then submit:
+eas submit --platform android --profile production --latest
+
+═══════════════════════════════════════════════════════════════════════════════
+7. BUILD BOTH PLATFORMS SIMULTANEOUSLY
+═══════════════════════════════════════════════════════════════════════════════
+
+Build Both iOS and Android at Once
+───────────────────────────────────
+eas build --platform all --profile production
+
+Monitor Build Progress
+───────────────────────
+Check build status online:
+https://expo.dev/accounts/[your-account]/projects/irememberit/builds
+
+Or via CLI:
+eas build:list
+
+Cancel a build:
+eas build:cancel [BUILD_ID]
+
+═══════════════════════════════════════════════════════════════════════════════
+8. APP STORE SUBMISSION CHECKLIST
+═══════════════════════════════════════════════════════════════════════════════
+
+iOS App Store
+─────────────
+□ App Store Connect app created
+□ Bundle ID matches app.json
+□ App icons (1024x1024 required)
+□ Screenshots for all required device sizes
+□ Privacy policy URL
+□ App description and keywords
+□ Age rating questionnaire completed
+□ Pricing and availability configured
+□ Export compliance information
+
+Google Play Store
+─────────────────
+□ App created in Play Console
+□ Package name matches app.json
+□ App icons (512x512 required)
+□ Feature graphic (1024x500)
+□ Screenshots for phone and tablet
+□ Short description (80 chars)
+□ Full description (4000 chars)
+□ Privacy policy URL
+□ Content rating questionnaire completed
+□ Pricing and distribution settings
+
+═══════════════════════════════════════════════════════════════════════════════
+9. TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════════════════════
+
+Common Build Errors
+───────────────────
+
+Error: "expo-router" version mismatch
+Solution:
+cd /app/frontend
+npx expo install expo-router@latest
+
+Error: iOS build fails with provisioning profile error
+Solution:
+eas credentials --platform ios
+Select "Set up new credentials" and let EAS manage them
+
+Error: Android build fails with signing error
+Solution:
+eas credentials --platform android
+Regenerate keystore or upload your existing one
+
+Error: "Unable to resolve module"
+Solution:
+cd /app/frontend
+rm -rf node_modules
+yarn install
+npx expo start --clear
+
+Build Taking Too Long
+─────────────────────
+- Builds can take 10-30 minutes
+- Check build queue: eas build:list
+- Priority builds available for paid Expo accounts
+
+Testing Builds Locally
+──────────────────────
+
+For iOS (macOS only):
+1. Download .tar.gz build from EAS
+2. Extract and install in Simulator
+3. Or use: eas build --platform ios --profile development --local
+
+For Android:
+1. Download APK from EAS
+2. Install on device: adb install app.apk
+3. Or use: eas build --platform android --profile preview --local
+
+═══════════════════════════════════════════════════════════════════════════════
+10. VERSIONING & UPDATES
+═══════════════════════════════════════════════════════════════════════════════
+
+Before Each Release
+───────────────────
+Update version numbers in frontend/app.json:
+
+{
+  "expo": {
+    "version": "1.0.1",  // User-facing version
+    "ios": {
+      "buildNumber": "2"  // Increment for each iOS build
+    },
+    "android": {
+      "versionCode": 2    // Increment for each Android build
+    }
+  }
+}
+
+OTA Updates (Over-The-Air)
+──────────────────────────
+For JavaScript-only changes (no native code):
+
+eas update --branch production --message "Bug fixes"
+
+Users will receive updates without downloading from stores.
+
+Note: OTA updates only work for:
+- JavaScript changes
+- Asset updates
+- Configuration changes
+
+Native changes (dependencies, permissions) require full rebuild.
+
+═══════════════════════════════════════════════════════════════════════════════
+11. COMPLETE BUILD WORKFLOW EXAMPLE
+═══════════════════════════════════════════════════════════════════════════════
+
+# Initial setup (one time)
+cd /app/frontend
+eas login
+eas build:configure
+eas credentials
+
+# Set environment secrets
+eas secret:create --scope project --name EXPO_PUBLIC_BACKEND_URL --value "https://api.production.com" --type string
+
+# Update version in app.json
+# Edit: version, buildNumber, versionCode
+
+# Build for testing
+eas build --platform all --profile preview
+
+# Test builds thoroughly
+# Download and install on test devices
+
+# Build for production
+eas build --platform all --profile production
+
+# Monitor builds
+eas build:list
+
+# Once builds complete, submit
+eas submit --platform ios --profile production --latest
+eas submit --platform android --profile production --latest
+
+# For JavaScript-only updates
+eas update --branch production --message "Fixed login issue"
+
+═══════════════════════════════════════════════════════════════════════════════
+12. IMPORTANT PRODUCTION CHECKLIST
+═══════════════════════════════════════════════════════════════════════════════
+
+Before Production Build:
+────────────────────────
+□ Update EXPO_PUBLIC_BACKEND_URL to production API
+□ Update Stripe keys to live keys (not test keys)
+□ Remove all console.log statements (optional)
+□ Test all critical flows: login, payment, learning sessions
+□ Verify deep links work correctly
+□ Test on real devices (iOS and Android)
+□ Check app icons and splash screens
+□ Verify push notifications work
+□ Test offline behavior
+□ Run on slow networks
+□ Test with different iOS/Android versions
+
+Security Checklist:
+───────────────────
+□ All API keys stored as EAS secrets
+□ No hardcoded credentials in code
+□ HTTPS only for all API calls
+□ Token refresh working properly
+□ Proper error handling for expired tokens
+□ Input validation on all forms
+
+Performance Checklist:
+──────────────────────
+□ Images optimized (<200KB each)
+□ Large lists use FlashList or VirtualizedList
+□ Avoid unnecessary re-renders
+□ Implement proper loading states
+□ Cache API responses where appropriate
+
+═══════════════════════════════════════════════════════════════════════════════
+13. USEFUL COMMANDS REFERENCE
+═══════════════════════════════════════════════════════════════════════════════
+
+# Login/Logout
+eas login
+eas logout
+eas whoami
+
+# Project info
+eas project:info
+
+# Build commands
+eas build --platform ios --profile production
+eas build --platform android --profile preview
+eas build --platform all --profile development
+eas build:list
+eas build:view [BUILD_ID]
+eas build:cancel [BUILD_ID]
+
+# Credentials
+eas credentials
+eas credentials:list
+
+# Secrets
+eas secret:create --scope project --name KEY --value "value" --type string
+eas secret:list
+eas secret:delete --name KEY
+
+# Submit
+eas submit --platform ios --latest
+eas submit --platform android --latest
+
+# Updates
+eas update --branch production --message "Update message"
+eas update:list
+eas channel:list
+eas branch:list
+
+# Device testing
+eas device:create
+eas device:list
+
+# Webhooks (for CI/CD)
+eas webhook:create --url https://your-webhook.com --event BUILD
+eas webhook:list
+
+═══════════════════════════════════════════════════════════════════════════════
+14. ADDITIONAL RESOURCES
+═══════════════════════════════════════════════════════════════════════════════
+
+Official Documentation:
+───────────────────────
+- EAS Build: https://docs.expo.dev/build/introduction/
+- EAS Submit: https://docs.expo.dev/submit/introduction/
+- EAS Update: https://docs.expo.dev/eas-update/introduction/
+- App Store Guidelines: https://developer.apple.com/app-store/review/guidelines/
+- Play Store Guidelines: https://support.google.com/googleplay/android-developer/answer/9859152
+
+Support:
+────────
+- Expo Discord: https://chat.expo.dev/
+- Expo Forums: https://forums.expo.dev/
+- Stack Overflow: Tag with 'expo' and 'react-native'
+
+═══════════════════════════════════════════════════════════════════════════════
+
+END OF GUIDE
+
+For questions or issues during deployment, consult the Expo documentation or 
+reach out to the Expo community for assistance.
+
+Good luck with your deployment! 🚀
+
+═══════════════════════════════════════════════════════════════════════════════
