@@ -118,6 +118,9 @@ export default function SignupScreen() {
       // Set error message for on-screen display
       setErrorMessage(errorMsg);
       
+      // Scroll to top to show error
+      scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+      
       // Also show Alert
       Alert.alert('Signup Failed', errorMsg);
     } finally {
