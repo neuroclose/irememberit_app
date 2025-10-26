@@ -252,6 +252,20 @@ const styles = StyleSheet.create({
   form: {
     marginBottom: 24,
   },
+  errorContainer: {
+    backgroundColor: '#991b1b',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#dc2626',
+  },
+  errorText: {
+    color: '#fee2e2',
+    fontSize: 14,
+    fontWeight: '500',
+    textAlign: 'center',
+  },
   label: {
     fontSize: 14,
     fontWeight: '600',
