@@ -150,13 +150,22 @@ export default function LoginScreen() {
         </View>
 
         <View style={styles.form}>
+          {errorMessage ? (
+            <View style={styles.errorContainer}>
+              <Text style={styles.errorText}>{errorMessage}</Text>
+            </View>
+          ) : null}
+          
           <Text style={styles.label}>Email Address</Text>
           <TextInput
             style={styles.input}
             placeholder="Enter your email"
             placeholderTextColor="#64748b"
             value={email}
-            onChangeText={setEmail}
+            onChangeText={(text) => {
+              setEmail(text);
+              setErrorMessage(''); // Clear error when user types
+            }}
             autoCapitalize="none"
             keyboardType="email-address"
             editable={!loading}
@@ -168,7 +177,10 @@ export default function LoginScreen() {
             placeholder="Enter your password"
             placeholderTextColor="#64748b"
             value={password}
-            onChangeText={setPassword}
+            onChangeText={(text) => {
+              setPassword(text);
+              setErrorMessage(''); // Clear error when user types
+            }}
             secureTextEntry
             autoCapitalize="none"
             editable={!loading}
