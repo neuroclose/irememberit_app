@@ -496,7 +496,17 @@ export default function SubscriptionScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity 
+          onPress={() => {
+            console.log('[Subscription] Back button pressed');
+            if (router.canGoBack()) {
+              router.back();
+            } else {
+              router.replace('/(tabs)/profile');
+            }
+          }} 
+          style={styles.backButton}
+        >
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Subscription</Text>
