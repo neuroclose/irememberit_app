@@ -74,6 +74,7 @@ export default function SignupScreen() {
 
     console.log('Validation passed, starting signup...');
     setLoading(true);
+    setErrorMessage(''); // Clear any previous errors
     try {
       console.log('Calling API signup...');
       await apiService.signup(
@@ -96,10 +97,28 @@ export default function SignupScreen() {
       console.error('=== SIGNUP ERROR ===');
       console.error('Error:', error);
       console.error('Error response:', error.response?.data);
-      Alert.alert(
-        'Signup Failed',
-        error.response?.data?.message || error.message || 'Unable to create account. Please try again.'
-      );
+      
+      // Extract error message
+      let errorMsg = '';
+      if (error.response?.data?.detail) {
+        errorMsg = error.response.data.detail;
+      } else if (error.response?.data?.message) {
+        errorMsg = error.response.data.message;
+      } else if (error.response?.data?.error) {
+        errorMsg = error.response.data.error;
+      } else if (error.message) {
+        errorMsg = error.message;
+      } else {
+        errorMsg = 'Unable to create account. Please try again.';
+      }
+      
+      console.log('Final error message to display:', errorMsg);
+      
+      // Set error message for on-screen display
+      setErrorMessage(errorMsg);
+      
+      // Also show Alert
+      Alert.alert('Signup Failed', errorMsg);
     } finally {
       setLoading(false);
       console.log('=== SIGNUP COMPLETE ===');
