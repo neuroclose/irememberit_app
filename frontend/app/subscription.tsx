@@ -137,47 +137,78 @@ export default function SubscriptionScreen() {
 
   const checkSubscriptionStatus = async () => {
     try {
-      console.log('[Subscription] Manually refreshing user data...');
-      console.log('[Subscription] Has organization:', hasOrganization);
+      setIsCheckingPayment(true);
+      console.log('[Subscription] Manually refreshing subscription data...');
+      console.log('[Subscription] User type:', hasOrganization ? 'Organization' : 'Standalone');
+      console.log('[Subscription] User ID:', user?.id);
+      console.log('[Subscription] Organization ID:', user?.organizationId);
       
       let updatedUserData = null;
       
       if (hasOrganization) {
-        // For organization users, get from /api/organization
+        // ORGANIZATION USERS: Fetch organization subscription data
+        console.log('[Subscription] Fetching organization subscription...');
         try {
           const orgData = await apiService.getOrganization();
-          console.log('[Subscription] Organization data:', JSON.stringify(orgData, null, 2));
-          // Merge org tier into user object
-          updatedUserData = { ...user, tier: orgData.tier, subscriptionStatus: orgData.subscriptionStatus };
-        } catch (error) {
-          console.error('[Subscription] Failed to get organization data:', error);
+          console.log('[Subscription] Organization data received:', JSON.stringify(orgData, null, 2));
+          
+          // Organization users get tier and status from organization
+          updatedUserData = { 
+            ...user, 
+            tier: orgData.tier || 'free',
+            subscriptionStatus: orgData.subscriptionStatus || 'active',
+            stripeCustomerId: orgData.stripeCustomerId || null,
+            stripeSubscriptionId: orgData.stripeSubscriptionId || null
+          };
+          
+          console.log('[Subscription] Organization user updated with org tier:', updatedUserData.tier);
+        } catch (error: any) {
+          console.error('[Subscription] Failed to get organization data:', error.message);
+          // Keep existing user data if org fetch fails
+          updatedUserData = user;
         }
       } else {
-        // For standalone users, get from /api/auth/user
+        // STANDALONE USERS: Fetch individual user subscription data
+        console.log('[Subscription] Fetching standalone user subscription...');
         try {
           const userData = await apiService.getCurrentUser();
-          console.log('[Subscription] User data from /auth/user:', JSON.stringify(userData, null, 2));
+          console.log('[Subscription] Standalone user data received:', JSON.stringify(userData, null, 2));
+          
+          // Use the fresh user data with tier from their individual subscription
           updatedUserData = userData;
-        } catch (error) {
-          console.error('[Subscription] Failed to get user data, trying sync:', error);
+          
+          console.log('[Subscription] Standalone user tier:', updatedUserData.tier);
+        } catch (error: any) {
+          console.error('[Subscription] Failed to get user data:', error.message);
+          console.log('[Subscription] Attempting fallback to sync endpoint...');
+          
           // Fallback to sync endpoint
-          const syncData = await apiService.getInitialSync();
-          console.log('[Subscription] Sync data:', JSON.stringify(syncData, null, 2));
-          updatedUserData = syncData.user;
+          try {
+            const syncData = await apiService.getInitialSync();
+            console.log('[Subscription] Sync data received:', JSON.stringify(syncData, null, 2));
+            updatedUserData = syncData.user;
+          } catch (syncError: any) {
+            console.error('[Subscription] Sync fallback also failed:', syncError.message);
+            updatedUserData = user; // Keep existing data
+          }
         }
       }
       
       if (updatedUserData) {
-        console.log('[Subscription] Updated user tier:', updatedUserData.tier);
-        console.log('[Subscription] Updated user subscriptionStatus:', updatedUserData.subscriptionStatus);
+        const oldTier = user?.tier;
+        const newTier = updatedUserData.tier;
         
+        console.log('[Subscription] Tier comparison - Old:', oldTier, '| New:', newTier);
+        console.log('[Subscription] Subscription status:', updatedUserData.subscriptionStatus);
+        
+        // Update user in global state
         useAuthStore.getState().setUser(updatedUserData);
         
-        // If tier changed from the stored user, show success message
-        if (updatedUserData.tier !== user?.tier) {
+        // Show appropriate message
+        if (newTier !== oldTier) {
           Alert.alert(
             'Subscription Updated! 🎉',
-            `You are now on the ${updatedUserData.tier.toUpperCase()} plan!`
+            `You are now on the ${newTier.toUpperCase()} plan!`
           );
         } else {
           Alert.alert(
@@ -186,9 +217,10 @@ export default function SubscriptionScreen() {
           );
         }
       }
+      
       setIsCheckingPayment(false);
-    } catch (error) {
-      console.error('[Subscription] Failed to check status:', error);
+    } catch (error: any) {
+      console.error('[Subscription] Critical error in checkSubscriptionStatus:', error);
       Alert.alert(
         'Refresh Failed',
         'Unable to refresh subscription data. Please try again.'
