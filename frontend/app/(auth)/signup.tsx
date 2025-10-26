@@ -274,7 +274,10 @@ export default function SignupScreen() {
             placeholder="Enter your email"
             placeholderTextColor="#64748b"
             value={email}
-            onChangeText={setEmail}
+            onChangeText={(text) => {
+              setEmail(text);
+              setErrorMessage(''); // Clear error when user types
+            }}
             autoCapitalize="none"
             keyboardType="email-address"
             editable={!loading}
