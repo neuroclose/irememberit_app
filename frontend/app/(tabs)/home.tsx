@@ -152,7 +152,7 @@ export default function HomeScreen() {
     enabled: hasOrganization,
   });
 
-  const unreadAnnouncementsCount = announcements?.filter((a: any) => !a.read)?.length || 0;
+  const unreadAnnouncementsCount = announcements?.filter((a: any) => !a.userAnnouncement?.hasRead)?.length || 0;
   
   // Filter modules based on user role
   const unassignedModules = isAdmin && hasOrganization 
