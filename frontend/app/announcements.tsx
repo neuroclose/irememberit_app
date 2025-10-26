@@ -87,17 +87,17 @@ export default function AnnouncementsScreen() {
                 key={announcement.id}
                 style={[
                   styles.announcementCard,
-                  !announcement.read && styles.announcementCardUnread,
+                  !announcement.userAnnouncement?.hasRead && styles.announcementCardUnread,
                 ]}
                 onPress={() => handleAnnouncementPress(announcement)}
               >
                 <View style={styles.announcementHeader}>
                   <View style={styles.announcementTitleRow}>
-                    {!announcement.read && <View style={styles.unreadDot} />}
+                    {!announcement.userAnnouncement?.hasRead && <View style={styles.unreadDot} />}
                     <Text
                       style={[
                         styles.announcementTitle,
-                        !announcement.read && styles.announcementTitleUnread,
+                        !announcement.userAnnouncement?.hasRead && styles.announcementTitleUnread,
                       ]}
                     >
                       {announcement.title}
