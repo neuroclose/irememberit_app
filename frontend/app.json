@@ -10,7 +10,11 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.neroclose.irememberit"
+      "bundleIdentifier": "com.neroclose.irememberit",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "This app needs access to your microphone for voice recording during learning sessions.",
+        "NSSpeechRecognitionUsageDescription": "This app needs access to speech recognition for verbal learning modes."
+      }
     },
     "android": {
       "package": "com.neroclose.irememberit",
