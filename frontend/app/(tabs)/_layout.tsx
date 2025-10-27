@@ -41,7 +41,7 @@ export default function TabsLayout() {
               <Ionicons name="trophy" size={16} color="#f59e0b" />
               <Text style={styles.statText}>{totalPoints}</Text>
             </View>
-            {hasOrganization && rank && (
+            {hasOrganization && rank && rank !== 'N/A' && typeof rank === 'number' && (
               <View style={styles.statItem}>
                 <Ionicons name="ribbon" size={16} color="#8b5cf6" />
                 <Text style={styles.statText}>#{rank}</Text>
