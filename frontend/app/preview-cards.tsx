@@ -392,7 +392,10 @@ const styles = StyleSheet.create({
     borderBottomColor: '#334155',
   },
   backButton: {
-    padding: 8,
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   headerTitle: {
     fontSize: 20,
