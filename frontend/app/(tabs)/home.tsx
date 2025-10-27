@@ -163,43 +163,39 @@ export default function HomeScreen() {
     console.log(`[Home] Module "${m.title}":`, {
       id: m.id,
       moduleType: m.moduleType,
-      cards: m.cards?.length || 0,
-      createdById: m.createdById,
-      isPrivate: m.isPrivate,
       autoAssignToNewUsers: m.autoAssignToNewUsers,
-      organizationId: m.organizationId
+      cards: m.cards?.length || 0
     });
   });
   
-  // For organization admins, we need to determine assigned vs unassigned
-  // The API is returning moduleType='personal' for all, so we need different logic
+  // For organization admins:
+  // - "Assigned" modules are those with autoAssignToNewUsers=true OR moduleType='assigned'
+  // - "Unassigned" modules are those with autoAssignToNewUsers=false OR moduleType='unassigned'  
   const unassignedModules = isAdmin && hasOrganization 
     ? modules.filter((m: any) => {
-        // Check explicit unassigned first
         if (m.moduleType === 'unassigned') return true;
-        // For 'personal' modules from the admin, check if they should be unassigned
-        // based on your web app's logic (you'll need to tell me the criteria)
+        // Personal modules that are NOT auto-assigned are unassigned
+        if (m.moduleType === 'personal' && !m.autoAssignToNewUsers) return true;
         return false;
       })
     : [];
     
   const assignedModules = isAdmin && hasOrganization
     ? modules.filter((m: any) => {
-        // Check explicit assigned
         if (m.moduleType === 'assigned') return true;
-        // For now, show all 'personal' modules as assigned
-        if (m.moduleType === 'personal') return true;
+        // Personal modules that ARE auto-assigned are assigned
+        if (m.moduleType === 'personal' && m.autoAssignToNewUsers) return true;
         return false;
       })
-    : modules.filter((m: any) => m.moduleType === 'assigned' || m.moduleType === 'personal');
+    : modules.filter((m: any) => m.moduleType === 'assigned' || (m.moduleType === 'personal' && m.autoAssignToNewUsers));
     
   const myModules = !isAdmin || !hasOrganization
     ? modules.filter((m: any) => m.moduleType === 'personal' || m.createdById === user?.id)
     : [];
 
   console.log('[Home] Classification results:');
-  console.log('[Home] - Unassigned:', unassignedModules.length, unassignedModules.map((m: any) => m.title));
-  console.log('[Home] - Assigned:', assignedModules.length, assignedModules.map((m: any) => m.title));
+  console.log('[Home] - Unassigned:', unassignedModules.length, unassignedModules.map((m: any) => `${m.title} (autoAssign=${m.autoAssignToNewUsers})`));
+  console.log('[Home] - Assigned:', assignedModules.length, assignedModules.map((m: any) => `${m.title} (autoAssign=${m.autoAssignToNewUsers})`));
   console.log('[Home] - My Modules:', myModules.length, myModules.map((m: any) => m.title));
   console.log('[Home] ========================================');
 
