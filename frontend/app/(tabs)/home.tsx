@@ -156,25 +156,23 @@ export default function HomeScreen() {
   
   console.log('[Home] Module classification debug:');
   modules.forEach((m: any) => {
-    console.log(`[Home] Module "${m.name}": moduleType="${m.moduleType}", organizationId="${m.organizationId}", createdById="${m.createdById}", isPrivate=${m.isPrivate}`);
+    console.log(`[Home] Module "${m.title}": moduleType="${m.moduleType}", createdById="${m.createdById}", isPrivate=${m.isPrivate}, cards=${m.cards?.length || 0}`);
   });
+  console.log('[Home] User:', { id: user?.id, organizationId: user?.organizationId, role: user?.role });
   
   // Filter modules based on user role
-  // For organization users, classify based on organizationId match
+  // Simple logic: If module has cards, it's "assigned". If no cards, it's "unassigned"
   const unassignedModules = isAdmin && hasOrganization 
     ? modules.filter((m: any) => {
-        // Unassigned if explicitly marked OR private without assignment
-        return m.moduleType === 'unassigned' || (m.isPrivate && !m.moduleType);
+        // Unassigned if it has no cards (empty module)
+        return !m.cards || m.cards.length === 0;
       })
     : [];
     
   const assignedModules = isAdmin && hasOrganization
     ? modules.filter((m: any) => {
-        // For org admins: assigned if it belongs to their organization
-        // OR explicitly marked as assigned OR not unassigned/personal
-        return m.organizationId === user?.organizationId || 
-               m.moduleType === 'assigned' || 
-               (!m.isPrivate && m.moduleType !== 'unassigned' && m.moduleType !== 'personal');
+        // Assigned if it has cards
+        return m.cards && m.cards.length > 0;
       })
     : modules.filter((m: any) => m.moduleType === 'assigned');
     
@@ -185,7 +183,6 @@ export default function HomeScreen() {
   console.log('Home screen - modules count:', modules.length);
   console.log('Home screen - isAdmin:', isAdmin, 'hasOrg:', hasOrganization);
   console.log('Home screen - unassigned:', unassignedModules.length, 'assigned:', assignedModules.length);
-  console.log('[Home] User organizationId:', user?.organizationId);
 
   const renderModuleCard = (module: Module) => (
     <TouchableOpacity
