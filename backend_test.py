@@ -26,7 +26,7 @@ def get_backend_url():
             for line in f:
                 if line.startswith('EXPO_PUBLIC_BACKEND_URL='):
                     return line.split('=', 1)[1].strip()
-    return "https://subscriptify-3.preview.emergentagent.com"  # fallback
+    return "https://recall-app-update.preview.emergentagent.com"  # fallback
 
 BACKEND_URL = get_backend_url()
 API_BASE = f"{BACKEND_URL}/api"
