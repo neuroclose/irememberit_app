@@ -176,40 +176,44 @@ export default function HomeScreen() {
   
   // Module Classification Logic
   // The web API returns moduleType: 'personal' for all modules (not spec-compliant)
-  // We use autoAssignToNewUsers field as the reliable classification indicator:
-  // - autoAssignToNewUsers === true → Module is assigned to team (including new users)
-  // - autoAssignToNewUsers === false → Module is unassigned (private)
+  // Classification based on actual API behavior:
+  // - isPrivate: false + autoAssignToNewUsers: false → Assigned to organization (visible to all)
+  // - isPrivate: true OR autoAssignToNewUsers: undefined → Unassigned (private, admin only)
+  // - autoAssignToNewUsers: true → Assigned to all (including new users)
   
   const unassignedModules = isAdmin && hasOrganization 
     ? modules.filter((m: any) => {
-        const isAutoAssigned = m.autoAssignToNewUsers === true;
-        // Unassigned modules are those NOT auto-assigned
-        // Also include explicit 'unassigned' type for future compatibility
-        return !isAutoAssigned || m.moduleType === 'unassigned';
+        // Unassigned = Private modules OR modules not shared with organization
+        const isPrivateModule = m.isPrivate === true;
+        const isNotShared = m.isPrivate !== false && m.autoAssignToNewUsers !== true;
+        // Include explicit 'unassigned' type for future compatibility
+        return isPrivateModule || isNotShared || m.moduleType === 'unassigned';
       })
     : [];
     
   const assignedModules = isAdmin && hasOrganization
     ? modules.filter((m: any) => {
+        // Assigned = Not private (shared with organization) OR auto-assigned
+        const isSharedModule = m.isPrivate === false;
         const isAutoAssigned = m.autoAssignToNewUsers === true;
-        // Assigned modules are those auto-assigned to team
-        // Also include explicit 'assigned' type for future compatibility
-        return isAutoAssigned || m.moduleType === 'assigned';
+        // Include explicit 'assigned' type for future compatibility
+        return isSharedModule || isAutoAssigned || m.moduleType === 'assigned';
       })
     : modules.filter((m: any) => {
-        // For learners: show modules that are auto-assigned OR explicitly assigned type
+        // For learners: show modules that are shared or auto-assigned
+        const isSharedModule = m.isPrivate === false;
         const isAutoAssigned = m.autoAssignToNewUsers === true;
-        return isAutoAssigned || m.moduleType === 'assigned';
+        return isSharedModule || isAutoAssigned || m.moduleType === 'assigned';
       });
     
   const myModules = !isAdmin || !hasOrganization
     ? modules.filter((m: any) => {
-        // Learners see their own modules (created by them) OR personal type modules
+        // Learners see their own modules OR shared modules
         const isOwnModule = m.createdById === user?.id;
         const isPersonalType = m.moduleType === 'personal';
-        const isNotAutoAssigned = m.autoAssignToNewUsers !== true;
-        // Include modules they created OR personal modules not auto-assigned
-        return isOwnModule || (isPersonalType && isNotAutoAssigned);
+        const isPrivateModule = m.isPrivate === true;
+        // Include own modules OR personal private modules
+        return isOwnModule || (isPersonalType && isPrivateModule);
       })
     : [];
 
