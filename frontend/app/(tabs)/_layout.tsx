@@ -18,8 +18,14 @@ export default function TabsLayout() {
   });
   
   const totalPoints = userStats?.totalPoints || user?.totalPoints || 0;
-  const rank = userStats?.rank || user?.rank || 'N/A';
+  const rank = userStats?.rank || user?.rank || null;
   const hasOrganization = !!user?.organizationId;
+  
+  console.log('[TabLayout] User stats:', userStats);
+  console.log('[TabLayout] User rank from stats:', userStats?.rank);
+  console.log('[TabLayout] User rank from user:', user?.rank);
+  console.log('[TabLayout] Final rank:', rank);
+  console.log('[TabLayout] Has organization:', hasOrganization);
   
   return (
     <Tabs
