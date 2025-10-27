@@ -162,9 +162,15 @@ export default function HomeScreen() {
   modules.forEach((m: any) => {
     console.log(`[Home] Module "${m.title}":`, {
       id: m.id,
+      title: m.title,
       moduleType: m.moduleType,
       autoAssignToNewUsers: m.autoAssignToNewUsers,
-      cards: m.cards?.length || 0
+      createdById: m.createdById,
+      isPrivate: m.isPrivate,
+      cards: m.cards?.length || 0,
+      // Check classification decision
+      willBeAssigned: m.autoAssignToNewUsers === true || m.moduleType === 'assigned',
+      willBeUnassigned: !(m.autoAssignToNewUsers === true) && m.moduleType !== 'assigned'
     });
   });
   
