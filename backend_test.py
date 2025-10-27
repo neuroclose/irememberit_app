@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Backend API Testing for Module Creation Endpoints
-Tests the newly implemented module creation functionality and existing endpoints.
+Backend API Testing Suite for iRememberIt Mobile App
+Focus: Leaderboard endpoint testing with fallback scenarios
 """
 
 import asyncio
@@ -11,10 +11,9 @@ import logging
 from datetime import datetime
 import os
 import sys
-import tempfile
 from pathlib import Path
 
-# Configure logging to capture sync payload logs
+# Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
