@@ -253,7 +253,9 @@ class ApiService {
   }
 
   async getCardById(cardId: string) {
-    const response = await this.api.get(`/cards/${cardId}`);
+    console.log('[API] Fetching card by ID:', cardId);
+    const response = await this.api.get(`/proxy/cards/${cardId}`);
+    console.log('[API] Card response:', response.data);
     return response.data;
   }
 
