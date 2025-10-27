@@ -356,9 +356,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Module Creation Backend Endpoints"
-    - "Module Creation UI - Three Methods"
-    - "Module Creation Preview & Assignment"
+    - "Leaderboard Loading and Display"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
