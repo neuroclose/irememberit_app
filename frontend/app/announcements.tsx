@@ -27,16 +27,36 @@ export default function AnnouncementsScreen() {
     enabled: !!user?.organizationId,
   });
 
+  // Mark announcement as read
   const markReadMutation = useMutation({
-    mutationFn: (id: string) => apiService.markAnnouncementRead(id),
-    onSuccess: () => {
+    mutationFn: (id: string) => {
+      console.log('[Announcements] Marking announcement as read:', id);
+      return apiService.markAnnouncementRead(id);
+    },
+    onSuccess: (data, id) => {
+      console.log('[Announcements] Successfully marked as read:', id);
+      console.log('[Announcements] Response:', data);
+      // Invalidate both announcements query and home query (for badge count)
       queryClient.invalidateQueries({ queryKey: ['announcements'] });
+      // Also refetch immediately to ensure UI updates
+      refetch();
+    },
+    onError: (error: any, id) => {
+      console.error('[Announcements] Error marking as read:', id, error);
+      console.error('[Announcements] Error details:', error.response?.data);
+      Alert.alert('Error', 'Failed to mark announcement as read. Please try again.');
     },
   });
 
   const handleAnnouncementPress = (announcement: any) => {
+    console.log('[Announcements] Announcement pressed:', announcement.id);
+    console.log('[Announcements] Current hasRead status:', announcement.userAnnouncement?.hasRead);
+    
     if (!announcement.userAnnouncement?.hasRead) {
+      console.log('[Announcements] Marking as read...');
       markReadMutation.mutate(announcement.id);
+    } else {
+      console.log('[Announcements] Already marked as read, skipping');
     }
   };
 
