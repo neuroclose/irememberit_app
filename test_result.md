@@ -299,7 +299,7 @@ frontend:
 
   - task: "Module Creation Preview & Assignment"
     implemented: true
-    working: "NA"
+    working: false
     file: "frontend/app/preview-cards.tsx, backend/server.py"
     stuck_count: 1
     priority: "critical"
@@ -314,6 +314,21 @@ frontend:
       - working: "NA"
         agent: "main"
         comment: "INVESTIGATING: Added comprehensive logging to backend /api/proxy/modules/create endpoint to capture: 1) Full request payload structure, 2) Card array format, 3) Authorization header presence, 4) Detailed error responses from web API. Logs will show exact payload being sent to web API and detailed error message. Need user to attempt module creation to capture logs and diagnose the payload structure issue."
+  
+  - task: "Module Classification on Home Screen"
+    implemented: true
+    working: false
+    file: "frontend/app/(tabs)/home.tsx"
+    stuck_count: 1
+    priority: "critical"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "user"
+        comment: "USER REPORTED: Module classification on home screen is not working correctly. Modules are not displaying or are incorrectly categorized as assigned/unassigned."
+      - working: "NA"
+        agent: "main"
+        comment: "INVESTIGATING: Examining actual API response from /mobile/sync/initial to determine correct module data structure. Current logic uses moduleType and autoAssignToNewUsers fields. According to MOBILE_BACKEND_REQUIREMENTS.md, moduleType should be 'personal'/'assigned'/'unassigned'. Need to verify what the web API is actually returning and adjust classification logic accordingly."
 
 metadata:
   created_by: "main_agent"
