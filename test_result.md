@@ -332,6 +332,21 @@ frontend:
       - working: true
         agent: "main"
         comment: "FIX IMPLEMENTED: Updated module classification logic to use autoAssignToNewUsers field as primary indicator: autoAssignToNewUsers===true means assigned to team (including new users), autoAssignToNewUsers===false/undefined means unassigned (private). For admins: unassigned modules are those with autoAssignToNewUsers!==true, assigned modules have autoAssignToNewUsers===true. For learners: my_modules include own created modules OR personal type modules not auto-assigned, assigned modules are those with autoAssignToNewUsers===true. Logic now correctly handles the API's actual data structure while maintaining compatibility with future spec-compliant moduleType values."
+  
+  - task: "Leaderboard Loading and Display"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py, frontend/app/(tabs)/leaderboard.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "user"
+        comment: "USER REPORTED: Leaderboard is failing to load with 'Expecting value: line 1 column 1' error. Web API returning empty response."
+      - working: "NA"
+        agent: "main"
+        comment: "FIX IMPLEMENTED: Enhanced error handling in /api/proxy/mobile/leaderboard endpoint. Added try-catch around JSON parsing to handle empty responses from web API. Improved fallback logic to reliably use local MongoDB data when web API fails or returns empty data. Added detailed logging for debugging. Backend restarted. Ready for testing."
 
 metadata:
   created_by: "main_agent"
