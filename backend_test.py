@@ -30,7 +30,7 @@ def get_backend_url():
 BACKEND_URL = get_backend_url()
 API_BASE = f"{BACKEND_URL}/api"
 
-class BackendTester:
+class LeaderboardTester:
     def __init__(self):
         self.client = httpx.AsyncClient(timeout=30.0)
         self.test_results = []
@@ -38,19 +38,15 @@ class BackendTester:
     async def close(self):
         await self.client.aclose()
     
-    def log_test(self, test_name, success, message, details=None):
-        """Log test results"""
+    def log_test_result(self, test_name, success, details=""):
+        """Log test result for summary"""
         status = "✅ PASS" if success else "❌ FAIL"
-        result = {
-            "test": test_name,
-            "success": success,
-            "message": message,
-            "details": details or {}
-        }
-        self.test_results.append(result)
-        logger.info(f"{status}: {test_name} - {message}")
-        if details:
-            logger.info(f"Details: {details}")
+        self.test_results.append({
+            'test': test_name,
+            'success': success,
+            'details': details
+        })
+        logger.info(f"{status}: {test_name} - {details}")
     
     async def test_backend_health(self):
         """Test basic backend connectivity"""
