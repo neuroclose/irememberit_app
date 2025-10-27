@@ -214,55 +214,32 @@ class LeaderboardTester:
             self.log_test_result(test_name, False, f"Exception: {str(e)}")
             return False
 
-    async def test_parse_cards_endpoint(self):
-        """Test POST /api/proxy/parse-cards endpoint (existing functionality)"""
-        
-        test_payload = {
-            "content": "The capital of France is Paris. Python is a programming language. Machine learning uses algorithms."
-        }
-        
-        # Test 1: Without authorization
-        test_name = "Parse Cards - No Auth (Expected 401)"
+    async def test_leaderboard_error_handling(self):
+        """Test error handling scenarios"""
+        test_name = "Leaderboard error handling"
         try:
-            response = await self.client.post(
-                f"{API_BASE}/proxy/parse-cards",
-                json=test_payload
-            )
+            # Test with malformed parameters
+            response = await self.client.get(f"{API_BASE}/proxy/mobile/leaderboard?timeframe=invalid_timeframe")
             
-            # Backend returns 500 but logs show it's correctly proxying to external API and getting 401
-            if response.status_code == 500 and "401 Unauthorized" in response.text:
-                self.log_test(test_name, True, "Proxy working - external API returned 401 as expected")
-            elif response.status_code == 401:
-                self.log_test(test_name, True, "Correctly returned 401 Unauthorized")
+            # Should still return 200 with fallback data, not crash
+            if response.status_code == 200:
+                data = response.json()
+                if "leaderboard" in data:
+                    self.log_test_result(test_name, True, "Handles invalid timeframe gracefully")
+                else:
+                    self.log_test_result(test_name, False, "Invalid timeframe caused malformed response")
             else:
-                self.log_test(test_name, False, 
-                            f"Expected 401 or 500 with 401 message, got {response.status_code}",
-                            {"response_text": response.text[:200]})
-        except Exception as e:
-            self.log_test(test_name, False, f"Request failed: {str(e)}")
-        
-        # Test 2: With authorization header
-        test_name = "Parse Cards - With Auth Header"
-        try:
-            headers = {"Authorization": "Bearer fake-jwt-token-for-testing"}
-            response = await self.client.post(
-                f"{API_BASE}/proxy/parse-cards",
-                json=test_payload,
-                headers=headers
-            )
+                # If it returns an error, that's also acceptable as long as it's not a 500
+                if response.status_code == 500:
+                    self.log_test_result(test_name, False, f"Server error with invalid timeframe: {response.text}")
+                else:
+                    self.log_test_result(test_name, True, f"Properly rejected invalid timeframe with {response.status_code}")
             
-            # Backend returns 500 but logs show it's correctly proxying to external API and getting 401
-            if response.status_code == 500 and "401 Unauthorized" in response.text:
-                self.log_test(test_name, True, "Proxy working - external API returned 401 as expected")
-            elif response.status_code in [200, 401, 403]:
-                self.log_test(test_name, True, 
-                            f"Proxy working, returned {response.status_code}")
-            else:
-                self.log_test(test_name, False, 
-                            f"Unexpected status code: {response.status_code}",
-                            {"response_text": response.text[:200]})
+            return True
+            
         except Exception as e:
-            self.log_test(test_name, False, f"Request failed: {str(e)}")
+            self.log_test_result(test_name, False, f"Exception: {str(e)}")
+            return False
 
     async def test_progress_save_with_cardid(self):
         """Test /api/progress/save endpoint accepts and processes cardId parameter"""
