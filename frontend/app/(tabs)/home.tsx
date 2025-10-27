@@ -154,35 +154,39 @@ export default function HomeScreen() {
 
   const unreadAnnouncementsCount = announcements?.filter((a: any) => !a.userAnnouncement?.hasRead)?.length || 0;
   
-  console.log('[Home] Module classification debug:');
-  modules.forEach((m: any) => {
-    console.log(`[Home] Module "${m.title}": moduleType="${m.moduleType}", createdById="${m.createdById}", isPrivate=${m.isPrivate}, cards=${m.cards?.length || 0}`);
-  });
-  console.log('[Home] User:', { id: user?.id, organizationId: user?.organizationId, role: user?.role });
+  console.log('[Home] ===== MODULE CLASSIFICATION DEBUG =====');
+  console.log('[Home] Total modules:', modules.length);
+  console.log('[Home] User:', { id: user?.id, role: user?.role, organizationId: user?.organizationId });
+  console.log('[Home] isAdmin:', isAdmin, 'hasOrganization:', hasOrganization);
   
-  // Filter modules based on user role
-  // Simple logic: If module has cards, it's "assigned". If no cards, it's "unassigned"
+  modules.forEach((m: any) => {
+    console.log(`[Home] Module "${m.title}":`, {
+      moduleType: m.moduleType,
+      cards: m.cards?.length || 0,
+      createdById: m.createdById,
+      isPrivate: m.isPrivate,
+      autoAssignToNewUsers: m.autoAssignToNewUsers
+    });
+  });
+  
+  // Use the moduleType from the API as the source of truth
   const unassignedModules = isAdmin && hasOrganization 
-    ? modules.filter((m: any) => {
-        // Unassigned if it has no cards (empty module)
-        return !m.cards || m.cards.length === 0;
-      })
+    ? modules.filter((m: any) => m.moduleType === 'unassigned')
     : [];
     
   const assignedModules = isAdmin && hasOrganization
-    ? modules.filter((m: any) => {
-        // Assigned if it has cards
-        return m.cards && m.cards.length > 0;
-      })
+    ? modules.filter((m: any) => m.moduleType === 'assigned')
     : modules.filter((m: any) => m.moduleType === 'assigned');
     
   const myModules = !isAdmin || !hasOrganization
     ? modules.filter((m: any) => m.moduleType === 'personal' || m.createdById === user?.id)
     : [];
 
-  console.log('Home screen - modules count:', modules.length);
-  console.log('Home screen - isAdmin:', isAdmin, 'hasOrg:', hasOrganization);
-  console.log('Home screen - unassigned:', unassignedModules.length, 'assigned:', assignedModules.length);
+  console.log('[Home] Classification results:');
+  console.log('[Home] - Unassigned:', unassignedModules.length, unassignedModules.map((m: any) => m.title));
+  console.log('[Home] - Assigned:', assignedModules.length, assignedModules.map((m: any) => m.title));
+  console.log('[Home] - My Modules:', myModules.length, myModules.map((m: any) => m.title));
+  console.log('[Home] ========================================');
 
   const renderModuleCard = (module: Module) => (
     <TouchableOpacity
