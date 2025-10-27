@@ -161,22 +161,37 @@ export default function HomeScreen() {
   
   modules.forEach((m: any) => {
     console.log(`[Home] Module "${m.title}":`, {
+      id: m.id,
       moduleType: m.moduleType,
       cards: m.cards?.length || 0,
       createdById: m.createdById,
       isPrivate: m.isPrivate,
-      autoAssignToNewUsers: m.autoAssignToNewUsers
+      autoAssignToNewUsers: m.autoAssignToNewUsers,
+      organizationId: m.organizationId
     });
   });
   
-  // Use the moduleType from the API as the source of truth
+  // For organization admins, we need to determine assigned vs unassigned
+  // The API is returning moduleType='personal' for all, so we need different logic
   const unassignedModules = isAdmin && hasOrganization 
-    ? modules.filter((m: any) => m.moduleType === 'unassigned')
+    ? modules.filter((m: any) => {
+        // Check explicit unassigned first
+        if (m.moduleType === 'unassigned') return true;
+        // For 'personal' modules from the admin, check if they should be unassigned
+        // based on your web app's logic (you'll need to tell me the criteria)
+        return false;
+      })
     : [];
     
   const assignedModules = isAdmin && hasOrganization
-    ? modules.filter((m: any) => m.moduleType === 'assigned')
-    : modules.filter((m: any) => m.moduleType === 'assigned');
+    ? modules.filter((m: any) => {
+        // Check explicit assigned
+        if (m.moduleType === 'assigned') return true;
+        // For now, show all 'personal' modules as assigned
+        if (m.moduleType === 'personal') return true;
+        return false;
+      })
+    : modules.filter((m: any) => m.moduleType === 'assigned' || m.moduleType === 'personal');
     
   const myModules = !isAdmin || !hasOrganization
     ? modules.filter((m: any) => m.moduleType === 'personal' || m.createdById === user?.id)
