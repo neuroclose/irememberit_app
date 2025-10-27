@@ -369,7 +369,7 @@ class ModuleClassificationTester:
         
         modules_found = False
         for test in self.results["tests_performed"]:
-            if test["modules_found"] > 0:
+            if test.get("modules_found", 0) > 0:
                 modules_found = True
                 print(f"✅ Found {test['modules_found']} modules in {test['test_name']}")
                 
