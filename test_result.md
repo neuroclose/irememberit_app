@@ -333,6 +333,10 @@ test_plan:
 agent_communication:
   - agent: "main"
     message: "Phase 1 MVP implementation complete. Built complete Expo app with: 1) JWT auth with secure storage, 2) Bottom tab navigation (Home/Learn/Profile), 3) Module listing with search, 4) Module detail view, 5) Fill-in-blank learning sessions with 9 stages, 6) Badges display, 7) User profile with stats. All components use React Native best practices with proper loading states, error handling, and keyboard handling. API service configured to connect to https://irememberit.replit.dev/api with automatic JWT refresh. Ready for backend testing to verify API integration."
+  - agent: "user"
+    message: "USER REPORTED: Module classification on home screen is not working correctly. Modules are not displaying or are incorrectly categorized as assigned/unassigned."
+  - agent: "main"
+    message: "INVESTIGATING MODULE CLASSIFICATION: Examining the home.tsx classification logic. Current logic uses moduleType and autoAssignToNewUsers fields. Need to verify what data is actually being returned by /mobile/sync/initial endpoint and ensure classification logic matches the actual data structure."
   - agent: "testing"
     message: "Backend API integration testing completed. CRITICAL FINDING: The external API at https://irememberit.replit.app/api is partially working. Protected endpoints like /auth/user correctly return 401 JSON responses, but mobile auth endpoints (/mobile/auth/login, /mobile/auth/refresh) return HTML instead of JSON, suggesting they may not exist or are misconfigured on the external API. The API service configuration is correct (base URL, axios setup, JWT interceptor logic), but the external API doesn't seem to support the mobile-specific endpoints as implemented. Need to either: 1) Use different endpoint paths, 2) Contact API provider for correct mobile endpoints, or 3) Use web auth endpoints instead of mobile-specific ones."
   - agent: "main"
