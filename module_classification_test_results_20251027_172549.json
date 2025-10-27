@@ -2,7 +2,7 @@
   "test_timestamp": "2025-10-27T17:25:48.866092",
   "endpoint_tested": "/mobile/sync/initial",
   "web_api_url": "https://irememberit.replit.app/api",
-  "backend_url": "https://mobile-module-fix.preview.emergentagent.com/api",
+  "backend_url": "https://touchupui.preview.emergentagent.com/api",
   "tests_performed": [
     {
       "test_name": "Backend Status Check",
