@@ -283,61 +283,13 @@ class LeaderboardTester:
                     logger.info(f"  • {result['test']}: {result['details']}")
         
         logger.info("="*60)
-    
-    async def run_all_tests(self):
-        """Run all backend tests"""
-        logger.info("🚀 Starting Backend Tests for Module Creation Endpoints")
-        logger.info(f"Testing against: {API_BASE}")
-        
-        # Run tests in order
-        await self.test_backend_health()
-        await self.test_module_creation_endpoint()
-        await self.test_organization_users_endpoint()
-        await self.test_extract_text_endpoint()
-        await self.test_parse_cards_endpoint()
-        await self.test_progress_save_with_cardid()
-        await self.test_mongodb_storage_with_cardid()
-        await self.test_duplicate_stage_prevention()
-        
-        # Summary
-        passed = sum(1 for result in self.test_results if result["success"])
-        total = len(self.test_results)
-        
-        logger.info(f"\n📊 TEST SUMMARY: {passed}/{total} tests passed ({passed/total*100:.1f}%)")
-        
-        for result in self.test_results:
-            status = "✅" if result["success"] else "❌"
-            logger.info(f"{status} {result['test']}: {result['message']}")
-        
-        return self.test_results
 
 async def main():
     """Main test runner"""
-    tester = BackendTester()
+    tester = LeaderboardTester()
+    
     try:
-        results = await tester.run_all_tests()
-        
-        # Check if critical module creation tests passed
-        module_creation_tests = [
-            "Module Creation - With Auth Header",
-            "Module Creation - Org Assignment",
-            "Org Users - With Auth Header",
-            "Extract Text - With Auth Header",
-            "Parse Cards - With Auth Header"
-        ]
-        
-        module_creation_passed = all(
-            result["success"] for result in results 
-            if result["test"] in module_creation_tests
-        )
-        
-        if module_creation_passed:
-            logger.info("🎉 MODULE CREATION TESTS PASSED: All proxy endpoints are working correctly!")
-        else:
-            logger.error("💥 MODULE CREATION TESTS FAILED: Some proxy endpoints need attention!")
-        
-        return results
-        
+        await tester.run_all_tests()
     finally:
         await tester.close()
 
