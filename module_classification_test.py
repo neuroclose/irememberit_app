@@ -272,7 +272,7 @@ class ModuleClassificationTester:
         recommendations = []
         
         # Check if we found any successful module data
-        successful_tests = [t for t in self.results["tests_performed"] if t["status"] == "success" and t["modules_found"] > 0]
+        successful_tests = [t for t in self.results["tests_performed"] if t["status"] == "success" and t.get("modules_found", 0) > 0]
         
         if not successful_tests:
             recommendations.append({
