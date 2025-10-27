@@ -1,0 +1,35 @@
+{
+  "test_timestamp": "2025-10-27T17:25:48.866092",
+  "endpoint_tested": "/mobile/sync/initial",
+  "web_api_url": "https://irememberit.replit.app/api",
+  "backend_url": "https://recall-app-update.preview.emergentagent.com/api",
+  "tests_performed": [
+    {
+      "test_name": "Backend Status Check",
+      "description": "Check if backend is accessible",
+      "status": "success",
+      "error": null,
+      "backend_accessible": true
+    },
+    {
+      "test_name": "Direct Web API Call",
+      "description": "Test /mobile/sync/initial endpoint directly",
+      "status": "auth_required",
+      "error": "Authentication required - 401 Unauthorized",
+      "response_data": null,
+      "modules_found": 0,
+      "module_fields_analysis": {}
+    },
+    {
+      "test_name": "Backend Proxy Call",
+      "description": "Test /mobile/sync/initial through backend proxy",
+      "status": "auth_required",
+      "error": "Authentication required - 401 Unauthorized",
+      "response_data": null,
+      "modules_found": 0,
+      "module_fields_analysis": {}
+    }
+  ],
+  "module_analysis": {},
+  "classification_recommendations": []
+}
