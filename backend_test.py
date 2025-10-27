@@ -48,31 +48,53 @@ class LeaderboardTester:
         })
         logger.info(f"{status}: {test_name} - {details}")
     
-    async def test_backend_health(self):
-        """Test basic backend connectivity"""
-        test_name = "Backend Health Check"
-        
+    async def test_leaderboard_without_auth(self):
+        """Test leaderboard endpoint without authentication token"""
+        test_name = "Leaderboard without authentication"
         try:
-            response = await self.client.get(f"{API_BASE}/")
+            response = await self.client.get(f"{API_BASE}/proxy/mobile/leaderboard")
             
             if response.status_code == 200:
-                try:
-                    data = response.json()
-                    if data.get("message") == "Hello World":
-                        self.log_test(test_name, True, "Backend is responding correctly")
+                data = response.json()
+                
+                # Verify response structure
+                if "leaderboard" in data and isinstance(data["leaderboard"], list):
+                    # Check if fallback to local data worked
+                    if "source" in data and data["source"] == "local":
+                        self.log_test_result(test_name, True, f"Fallback to local data successful, {len(data['leaderboard'])} entries")
                     else:
-                        self.log_test(test_name, False, f"Unexpected response: {data}")
-                except:
-                    # If JSON parsing fails, check if it's HTML (which means backend is up)
-                    if "html" in response.text.lower() or len(response.text) > 0:
-                        self.log_test(test_name, True, "Backend is responding (non-JSON response)")
-                    else:
-                        self.log_test(test_name, False, f"Empty response from backend")
+                        self.log_test_result(test_name, True, f"Web API response successful, {len(data['leaderboard'])} entries")
+                    
+                    # Verify leaderboard structure if entries exist
+                    if data["leaderboard"]:
+                        entry = data["leaderboard"][0]
+                        required_fields = ["userId", "rank", "totalPoints"]
+                        missing_fields = [field for field in required_fields if field not in entry]
+                        
+                        if missing_fields:
+                            self.log_test_result(f"{test_name} - Structure", False, f"Missing fields: {missing_fields}")
+                        else:
+                            # Verify ranking order
+                            is_sorted = all(
+                                data["leaderboard"][i]["totalPoints"] >= data["leaderboard"][i+1]["totalPoints"]
+                                for i in range(len(data["leaderboard"])-1)
+                            )
+                            if is_sorted:
+                                self.log_test_result(f"{test_name} - Sorting", True, "Leaderboard properly sorted by points")
+                            else:
+                                self.log_test_result(f"{test_name} - Sorting", False, "Leaderboard not sorted correctly")
+                    
+                    return True
+                else:
+                    self.log_test_result(test_name, False, f"Invalid response structure: {data}")
+                    return False
             else:
-                self.log_test(test_name, False, f"HTTP {response.status_code}: {response.text}")
+                self.log_test_result(test_name, False, f"HTTP {response.status_code}: {response.text}")
+                return False
                 
         except Exception as e:
-            self.log_test(test_name, False, f"Exception: {str(e)}")
+            self.log_test_result(test_name, False, f"Exception: {str(e)}")
+            return False
 
     async def test_module_creation_endpoint(self):
         """Test POST /api/proxy/modules/create endpoint"""
