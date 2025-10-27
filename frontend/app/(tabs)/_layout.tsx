@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tabs } from 'expo-router';
+import { Tabs, usePathname } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { View, Text, StyleSheet } from 'react-native';
 import { useAuthStore } from '../../src/store/auth.store';
@@ -8,6 +8,7 @@ import { apiService } from '../../src/services/api.service';
 
 export default function TabsLayout() {
   const { user } = useAuthStore();
+  const pathname = usePathname();
   
   // Fetch user stats for header
   const { data: userStats } = useQuery({
@@ -21,11 +22,16 @@ export default function TabsLayout() {
   const rank = userStats?.rank || user?.rank || null;
   const hasOrganization = !!user?.organizationId;
   
+  // Check if we're on the leaderboard page
+  const isLeaderboardPage = pathname === '/leaderboard' || pathname === '/(tabs)/leaderboard';
+  
   console.log('[TabLayout] User stats:', userStats);
   console.log('[TabLayout] User rank from stats:', userStats?.rank);
   console.log('[TabLayout] User rank from user:', user?.rank);
   console.log('[TabLayout] Final rank:', rank);
   console.log('[TabLayout] Has organization:', hasOrganization);
+  console.log('[TabLayout] Current pathname:', pathname);
+  console.log('[TabLayout] Is leaderboard page:', isLeaderboardPage);
   
   return (
     <Tabs
@@ -41,7 +47,8 @@ export default function TabsLayout() {
               <Ionicons name="trophy" size={16} color="#f59e0b" />
               <Text style={styles.statText}>{totalPoints}</Text>
             </View>
-            {hasOrganization && rank && rank !== 'N/A' && typeof rank === 'number' && (
+            {/* Hide rank tile on leaderboard page */}
+            {!isLeaderboardPage && hasOrganization && rank && rank !== 'N/A' && typeof rank === 'number' && (
               <View style={styles.statItem}>
                 <Ionicons name="ribbon" size={16} color="#8b5cf6" />
                 <Text style={styles.statText}>#{rank}</Text>
