@@ -160,18 +160,28 @@ export default function HomeScreen() {
   console.log('[Home] isAdmin:', isAdmin, 'hasOrganization:', hasOrganization);
   
   modules.forEach((m: any) => {
-    console.log(`[Home] Module "${m.title}":`, {
+    console.log(`\n[Home] ========================================`);
+    console.log(`[Home] Module: "${m.title}"`);
+    console.log(`[Home] ========================================`);
+    console.log('[Home] ALL FIELDS:', JSON.stringify({
       id: m.id,
       title: m.title,
       moduleType: m.moduleType,
       autoAssignToNewUsers: m.autoAssignToNewUsers,
       createdById: m.createdById,
       isPrivate: m.isPrivate,
-      cards: m.cards?.length || 0,
-      // Check classification decision
-      willBeAssigned: m.autoAssignToNewUsers === true || m.moduleType === 'assigned',
-      willBeUnassigned: !(m.autoAssignToNewUsers === true) && m.moduleType !== 'assigned'
-    });
+      isArchived: m.isArchived,
+      organizationId: m.organizationId,
+      assignedTo: m.assignedTo,
+      assignedUserIds: m.assignedUserIds,
+      assignedUserCount: m.assignedUserCount,
+      cards: m.cards?.length || 0
+    }, null, 2));
+    console.log('[Home] Classification decision:');
+    console.log('[Home] - isPrivate:', m.isPrivate);
+    console.log('[Home] - autoAssignToNewUsers:', m.autoAssignToNewUsers);
+    console.log('[Home] - Will be ASSIGNED:', m.isPrivate === false || m.autoAssignToNewUsers === true);
+    console.log('[Home] - Will be UNASSIGNED:', m.isPrivate === true || (m.isPrivate !== false && m.autoAssignToNewUsers !== true));
   });
   
   // Module Classification Logic
