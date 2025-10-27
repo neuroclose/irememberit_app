@@ -1,154 +1,159 @@
-diff --git a/frontend/app/announcements.tsx b/frontend/app/announcements.tsx
-index 4abf722f..ece2f4a1 100644
---- a/frontend/app/announcements.tsx
-+++ b/frontend/app/announcements.tsx
-@@ -7,6 +7,7 @@ import {
-   ScrollView,
-   ActivityIndicator,
-   RefreshControl,
-+  Alert,
- } from 'react-native';
- import { router } from 'expo-router';
- import { Ionicons } from '@expo/vector-icons';
-@@ -26,16 +27,36 @@ export default function AnnouncementsScreen() {
-     enabled: !!user?.organizationId,
-   });
- 
-+  // Mark announcement as read
-   const markReadMutation = useMutation({
--    mutationFn: (id: string) => apiService.markAnnouncementRead(id),
--    onSuccess: () => {
-+    mutationFn: (id: string) => {
-+      console.log('[Announcements] Marking announcement as read:', id);
-+      return apiService.markAnnouncementRead(id);
-+    },
-+    onSuccess: (data, id) => {
-+      console.log('[Announcements] Successfully marked as read:', id);
-+      console.log('[Announcements] Response:', data);
-+      // Invalidate both announcements query and home query (for badge count)
-       queryClient.invalidateQueries({ queryKey: ['announcements'] });
-+      // Also refetch immediately to ensure UI updates
-+      refetch();
-+    },
-+    onError: (error: any, id) => {
-+      console.error('[Announcements] Error marking as read:', id, error);
-+      console.error('[Announcements] Error details:', error.response?.data);
-+      Alert.alert('Error', 'Failed to mark announcement as read. Please try again.');
-     },
-   });
- 
-   const handleAnnouncementPress = (announcement: any) => {
-+    console.log('[Announcements] Announcement pressed:', announcement.id);
-+    console.log('[Announcements] Current hasRead status:', announcement.userAnnouncement?.hasRead);
-+    
-     if (!announcement.userAnnouncement?.hasRead) {
-+      console.log('[Announcements] Marking as read...');
-       markReadMutation.mutate(announcement.id);
-+    } else {
-+      console.log('[Announcements] Already marked as read, skipping');
-     }
-   };
- 
 diff --git a/model.patch b/model.patch
-index fc6706b9..e69de29b 100644
+index a76e979b..e69de29b 100644
 --- a/model.patch
 +++ b/model.patch
-@@ -1,98 +0,0 @@
+@@ -1,154 +0,0 @@
+-diff --git a/frontend/app/announcements.tsx b/frontend/app/announcements.tsx
+-index 4abf722f..ece2f4a1 100644
+---- a/frontend/app/announcements.tsx
+-+++ b/frontend/app/announcements.tsx
+-@@ -7,6 +7,7 @@ import {
+-   ScrollView,
+-   ActivityIndicator,
+-   RefreshControl,
+-+  Alert,
+- } from 'react-native';
+- import { router } from 'expo-router';
+- import { Ionicons } from '@expo/vector-icons';
+-@@ -26,16 +27,36 @@ export default function AnnouncementsScreen() {
+-     enabled: !!user?.organizationId,
+-   });
+- 
+-+  // Mark announcement as read
+-   const markReadMutation = useMutation({
+--    mutationFn: (id: string) => apiService.markAnnouncementRead(id),
+--    onSuccess: () => {
+-+    mutationFn: (id: string) => {
+-+      console.log('[Announcements] Marking announcement as read:', id);
+-+      return apiService.markAnnouncementRead(id);
+-+    },
+-+    onSuccess: (data, id) => {
+-+      console.log('[Announcements] Successfully marked as read:', id);
+-+      console.log('[Announcements] Response:', data);
+-+      // Invalidate both announcements query and home query (for badge count)
+-       queryClient.invalidateQueries({ queryKey: ['announcements'] });
+-+      // Also refetch immediately to ensure UI updates
+-+      refetch();
+-+    },
+-+    onError: (error: any, id) => {
+-+      console.error('[Announcements] Error marking as read:', id, error);
+-+      console.error('[Announcements] Error details:', error.response?.data);
+-+      Alert.alert('Error', 'Failed to mark announcement as read. Please try again.');
+-     },
+-   });
+- 
+-   const handleAnnouncementPress = (announcement: any) => {
+-+    console.log('[Announcements] Announcement pressed:', announcement.id);
+-+    console.log('[Announcements] Current hasRead status:', announcement.userAnnouncement?.hasRead);
+-+    
+-     if (!announcement.userAnnouncement?.hasRead) {
+-+      console.log('[Announcements] Marking as read...');
+-       markReadMutation.mutate(announcement.id);
+-+    } else {
+-+      console.log('[Announcements] Already marked as read, skipping');
+-     }
+-   };
+- 
 -diff --git a/model.patch b/model.patch
--index 56899e96..e69de29b 100644
+-index fc6706b9..e69de29b 100644
 ---- a/model.patch
 -+++ b/model.patch
--@@ -1,93 +0,0 @@
---diff --git a/frontend/app/(auth)/login.tsx b/frontend/app/(auth)/login.tsx
---index 1506f7d3..62b98706 100644
------ a/frontend/app/(auth)/login.tsx
---+++ b/frontend/app/(auth)/login.tsx
---@@ -24,21 +24,25 @@ export default function LoginScreen() {
--- 
---   const handleLogin = async () => {
---     if (!email.trim()) {
---+      setErrorMessage('Please enter your email');
---       Alert.alert('Error', 'Please enter your email');
---       return;
---     }
--- 
---     if (!email.includes('@')) {
----      Alert.alert('Error', 'Please enter a valid email');
---+      setErrorMessage('Please enter a valid email address');
---+      Alert.alert('Error', 'Please enter a valid email address');
---       return;
---     }
--- 
---     if (!password.trim()) {
---+      setErrorMessage('Please enter your password');
---       Alert.alert('Error', 'Please enter your password');
---       return;
---     }
--- 
---     setLoading(true);
---+    setErrorMessage(''); // Clear any previous errors
---     console.log('Login attempt with email:', email);
---     try {
---       console.log('Calling API login...');
---@@ -78,23 +82,23 @@ export default function LoginScreen() {
---       console.error('Error message:', error.message);
---       
---       // Get error message from various possible locations
----      let errorMessage = '';
---+      let errorMsg = '';
---       
---       if (error.response?.data?.detail) {
----        errorMessage = error.response.data.detail;
---+        errorMsg = error.response.data.detail;
---       } else if (error.response?.data?.message) {
----        errorMessage = error.response.data.message;
---+        errorMsg = error.response.data.message;
---       } else if (error.response?.data?.error) {
----        errorMessage = error.response.data.error;
---+        errorMsg = error.response.data.error;
---       } else if (error.message) {
----        errorMessage = error.message;
---+        errorMsg = error.message;
---       } else {
----        errorMessage = 'Invalid email or password. Please try again.';
---+        errorMsg = 'Invalid email or password. Please try again.';
---       }
---       
----      console.log('Final error message to display:', errorMessage);
---+      console.log('Final error message to display:', errorMsg);
---       
----      const errorLower = errorMessage.toLowerCase();
---+      const errorLower = errorMsg.toLowerCase();
---       
---       // Check if error is due to email not verified
---       if (errorLower.includes('verify') || 
---@@ -102,6 +106,7 @@ export default function LoginScreen() {
---           errorLower.includes('not verified') ||
---           errorLower.includes('unverified') ||
---           error.response?.status === 403) {
---+        setErrorMessage('Please verify your email before logging in.');
---         Alert.alert(
---           'Email Not Verified',
---           'Please verify your email before logging in. Check your inbox for the verification link.',
---@@ -120,15 +125,13 @@ export default function LoginScreen() {
---         );
---       } else if (error.response?.status === 401) {
---         // Unauthorized - wrong credentials
----        Alert.alert(
----          'Login Failed',
----          'Invalid email or password. Please check your credentials and try again.'
----        );
---+        const msg = 'Invalid email or password. Please check your credentials and try again.';
---+        setErrorMessage(msg);
---+        Alert.alert('Login Failed', msg);
---       } else {
----        Alert.alert(
----          'Login Failed',
----          errorMessage || 'Unable to login. Please check your credentials and try again.'
----        );
---+        const msg = errorMsg || 'Unable to login. Please check your credentials and try again.';
---+        setErrorMessage(msg);
---+        Alert.alert('Login Failed', msg);
---       }
---     } finally {
---       setLoading(false);
+-@@ -1,98 +0,0 @@
+--diff --git a/model.patch b/model.patch
+--index 56899e96..e69de29b 100644
+----- a/model.patch
+--+++ b/model.patch
+--@@ -1,93 +0,0 @@
+---diff --git a/frontend/app/(auth)/login.tsx b/frontend/app/(auth)/login.tsx
+---index 1506f7d3..62b98706 100644
+------ a/frontend/app/(auth)/login.tsx
+---+++ b/frontend/app/(auth)/login.tsx
+---@@ -24,21 +24,25 @@ export default function LoginScreen() {
+--- 
+---   const handleLogin = async () => {
+---     if (!email.trim()) {
+---+      setErrorMessage('Please enter your email');
+---       Alert.alert('Error', 'Please enter your email');
+---       return;
+---     }
+--- 
+---     if (!email.includes('@')) {
+----      Alert.alert('Error', 'Please enter a valid email');
+---+      setErrorMessage('Please enter a valid email address');
+---+      Alert.alert('Error', 'Please enter a valid email address');
+---       return;
+---     }
+--- 
+---     if (!password.trim()) {
+---+      setErrorMessage('Please enter your password');
+---       Alert.alert('Error', 'Please enter your password');
+---       return;
+---     }
+--- 
+---     setLoading(true);
+---+    setErrorMessage(''); // Clear any previous errors
+---     console.log('Login attempt with email:', email);
+---     try {
+---       console.log('Calling API login...');
+---@@ -78,23 +82,23 @@ export default function LoginScreen() {
+---       console.error('Error message:', error.message);
+---       
+---       // Get error message from various possible locations
+----      let errorMessage = '';
+---+      let errorMsg = '';
+---       
+---       if (error.response?.data?.detail) {
+----        errorMessage = error.response.data.detail;
+---+        errorMsg = error.response.data.detail;
+---       } else if (error.response?.data?.message) {
+----        errorMessage = error.response.data.message;
+---+        errorMsg = error.response.data.message;
+---       } else if (error.response?.data?.error) {
+----        errorMessage = error.response.data.error;
+---+        errorMsg = error.response.data.error;
+---       } else if (error.message) {
+----        errorMessage = error.message;
+---+        errorMsg = error.message;
+---       } else {
+----        errorMessage = 'Invalid email or password. Please try again.';
+---+        errorMsg = 'Invalid email or password. Please try again.';
+---       }
+---       
+----      console.log('Final error message to display:', errorMessage);
+---+      console.log('Final error message to display:', errorMsg);
+---       
+----      const errorLower = errorMessage.toLowerCase();
+---+      const errorLower = errorMsg.toLowerCase();
+---       
+---       // Check if error is due to email not verified
+---       if (errorLower.includes('verify') || 
+---@@ -102,6 +106,7 @@ export default function LoginScreen() {
+---           errorLower.includes('not verified') ||
+---           errorLower.includes('unverified') ||
+---           error.response?.status === 403) {
+---+        setErrorMessage('Please verify your email before logging in.');
+---         Alert.alert(
+---           'Email Not Verified',
+---           'Please verify your email before logging in. Check your inbox for the verification link.',
+---@@ -120,15 +125,13 @@ export default function LoginScreen() {
+---         );
+---       } else if (error.response?.status === 401) {
+---         // Unauthorized - wrong credentials
+----        Alert.alert(
+----          'Login Failed',
+----          'Invalid email or password. Please check your credentials and try again.'
+----        );
+---+        const msg = 'Invalid email or password. Please check your credentials and try again.';
+---+        setErrorMessage(msg);
+---+        Alert.alert('Login Failed', msg);
+---       } else {
+----        Alert.alert(
+----          'Login Failed',
+----          errorMessage || 'Unable to login. Please check your credentials and try again.'
+----        );
+---+        const msg = errorMsg || 'Unable to login. Please check your credentials and try again.';
+---+        setErrorMessage(msg);
+---+        Alert.alert('Login Failed', msg);
+---       }
+---     } finally {
+---       setLoading(false);
