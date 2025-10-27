@@ -18,7 +18,7 @@ from typing import Dict, List, Any, Optional
 
 # Configuration
 WEB_API_BASE_URL = "https://irememberit.replit.app/api"
-BACKEND_URL = "https://recall-app-update.preview.emergentagent.com/api"
+BACKEND_URL = "https://mobile-module-fix.preview.emergentagent.com/api"
 
 class ModuleClassificationTester:
     def __init__(self):
