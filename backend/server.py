@@ -430,8 +430,28 @@ async def get_card_by_id(card_id: str, authorization: str = Header(None)):
                 headers=headers,
                 timeout=10.0
             )
-            response.raise_for_status()
-            return response.json()
+            
+            # Check if response is successful and has content
+            if response.status_code == 200:
+                if not response.text or response.text.strip() == '':
+                    logger.warning(f"Empty response from web API for card {card_id}")
+                    raise HTTPException(status_code=404, detail="Card not found - empty response")
+                
+                try:
+                    return response.json()
+                except json.JSONDecodeError as e:
+                    logger.error(f"Invalid JSON in card response for {card_id}: {response.text[:100]}")
+                    raise HTTPException(status_code=500, detail="Invalid card data format")
+            else:
+                logger.warning(f"Non-200 status for card {card_id}: {response.status_code}")
+                response.raise_for_status()
+                
+    except httpx.HTTPStatusError as e:
+        logger.error(f"HTTP error fetching card {card_id}: {e}")
+        raise HTTPException(status_code=e.response.status_code, detail=f"Card API error: {str(e)}")
+    except httpx.TimeoutException:
+        logger.error(f"Timeout fetching card {card_id}")
+        raise HTTPException(status_code=504, detail="Card API timeout")
     except Exception as e:
         logger.error(f"Failed to fetch card {card_id}: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to fetch card: {str(e)}")
