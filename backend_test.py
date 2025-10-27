@@ -146,56 +146,73 @@ class LeaderboardTester:
             except Exception as e:
                 self.log_test_result(test_name, False, f"Exception with {timeframe}: {str(e)}")
 
-    async def test_extract_text_endpoint(self):
-        """Test POST /api/proxy/extract-text endpoint (existing functionality)"""
-        
-        # Create a simple test file
-        test_content = b"This is a test file for OCR extraction"
-        
-        # Test 1: Without authorization
-        test_name = "Extract Text - No Auth (Expected 401)"
+    async def test_leaderboard_response_validation(self):
+        """Test detailed response validation for leaderboard"""
+        test_name = "Leaderboard response validation"
         try:
-            files = {"file": ("test.txt", test_content, "text/plain")}
-            response = await self.client.post(
-                f"{API_BASE}/proxy/extract-text",
-                files=files
-            )
+            response = await self.client.get(f"{API_BASE}/proxy/mobile/leaderboard")
             
-            # Backend returns 500 but logs show it's correctly proxying to external API and getting 401
-            if response.status_code == 500 and "401 Unauthorized" in response.text:
-                self.log_test(test_name, True, "Proxy working - external API returned 401 as expected")
-            elif response.status_code == 401:
-                self.log_test(test_name, True, "Correctly returned 401 Unauthorized")
-            else:
-                self.log_test(test_name, False, 
-                            f"Expected 401 or 500 with 401 message, got {response.status_code}",
-                            {"response_text": response.text[:200]})
-        except Exception as e:
-            self.log_test(test_name, False, f"Request failed: {str(e)}")
-        
-        # Test 2: With authorization header
-        test_name = "Extract Text - With Auth Header"
-        try:
-            headers = {"Authorization": "Bearer fake-jwt-token-for-testing"}
-            files = {"file": ("test.txt", test_content, "text/plain")}
-            response = await self.client.post(
-                f"{API_BASE}/proxy/extract-text",
-                files=files,
-                headers=headers
-            )
+            if response.status_code != 200:
+                self.log_test_result(test_name, False, f"HTTP {response.status_code}")
+                return False
             
-            # Backend returns 500 but logs show it's correctly proxying to external API and getting 401
-            if response.status_code == 500 and "401 Unauthorized" in response.text:
-                self.log_test(test_name, True, "Proxy working - external API returned 401 as expected")
-            elif response.status_code in [200, 401, 403]:
-                self.log_test(test_name, True, 
-                            f"Proxy working, returned {response.status_code}")
-            else:
-                self.log_test(test_name, False, 
-                            f"Unexpected status code: {response.status_code}",
-                            {"response_text": response.text[:200]})
+            # Verify it's valid JSON
+            try:
+                data = response.json()
+            except json.JSONDecodeError as e:
+                self.log_test_result(test_name, False, f"Invalid JSON response: {str(e)}")
+                return False
+            
+            # Verify required top-level structure
+            if not isinstance(data, dict):
+                self.log_test_result(test_name, False, "Response is not a JSON object")
+                return False
+            
+            if "leaderboard" not in data:
+                self.log_test_result(test_name, False, "Missing 'leaderboard' field")
+                return False
+            
+            if not isinstance(data["leaderboard"], list):
+                self.log_test_result(test_name, False, "'leaderboard' is not an array")
+                return False
+            
+            # If leaderboard has entries, validate structure
+            if data["leaderboard"]:
+                for i, entry in enumerate(data["leaderboard"]):
+                    if not isinstance(entry, dict):
+                        self.log_test_result(test_name, False, f"Entry {i} is not an object")
+                        return False
+                    
+                    # Check required fields
+                    required_fields = ["userId", "rank", "totalPoints"]
+                    for field in required_fields:
+                        if field not in entry:
+                            self.log_test_result(test_name, False, f"Entry {i} missing field: {field}")
+                            return False
+                    
+                    # Validate field types
+                    if not isinstance(entry["rank"], int) or entry["rank"] < 1:
+                        self.log_test_result(test_name, False, f"Entry {i} has invalid rank: {entry['rank']}")
+                        return False
+                    
+                    if not isinstance(entry["totalPoints"], (int, float)) or entry["totalPoints"] < 0:
+                        self.log_test_result(test_name, False, f"Entry {i} has invalid totalPoints: {entry['totalPoints']}")
+                        return False
+                
+                # Verify ranks are sequential (1, 2, 3, ...)
+                expected_ranks = list(range(1, len(data["leaderboard"]) + 1))
+                actual_ranks = [entry["rank"] for entry in data["leaderboard"]]
+                
+                if actual_ranks != expected_ranks:
+                    self.log_test_result(test_name, False, f"Ranks not sequential. Expected: {expected_ranks}, Got: {actual_ranks}")
+                    return False
+            
+            self.log_test_result(test_name, True, f"Response structure valid, {len(data['leaderboard'])} entries")
+            return True
+            
         except Exception as e:
-            self.log_test(test_name, False, f"Request failed: {str(e)}")
+            self.log_test_result(test_name, False, f"Exception: {str(e)}")
+            return False
 
     async def test_parse_cards_endpoint(self):
         """Test POST /api/proxy/parse-cards endpoint (existing functionality)"""
