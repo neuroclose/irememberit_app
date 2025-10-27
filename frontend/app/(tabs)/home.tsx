@@ -168,29 +168,43 @@ export default function HomeScreen() {
     });
   });
   
-  // For organization admins:
-  // - "Assigned" modules are those with autoAssignToNewUsers=true OR moduleType='assigned'
-  // - "Unassigned" modules are those with autoAssignToNewUsers=false OR moduleType='unassigned'  
+  // Module Classification Logic
+  // The web API returns moduleType: 'personal' for all modules (not spec-compliant)
+  // We use autoAssignToNewUsers field as the reliable classification indicator:
+  // - autoAssignToNewUsers === true → Module is assigned to team (including new users)
+  // - autoAssignToNewUsers === false → Module is unassigned (private)
+  
   const unassignedModules = isAdmin && hasOrganization 
     ? modules.filter((m: any) => {
-        if (m.moduleType === 'unassigned') return true;
-        // Personal modules that are NOT auto-assigned are unassigned
-        if (m.moduleType === 'personal' && !m.autoAssignToNewUsers) return true;
-        return false;
+        const isAutoAssigned = m.autoAssignToNewUsers === true;
+        // Unassigned modules are those NOT auto-assigned
+        // Also include explicit 'unassigned' type for future compatibility
+        return !isAutoAssigned || m.moduleType === 'unassigned';
       })
     : [];
     
   const assignedModules = isAdmin && hasOrganization
     ? modules.filter((m: any) => {
-        if (m.moduleType === 'assigned') return true;
-        // Personal modules that ARE auto-assigned are assigned
-        if (m.moduleType === 'personal' && m.autoAssignToNewUsers) return true;
-        return false;
+        const isAutoAssigned = m.autoAssignToNewUsers === true;
+        // Assigned modules are those auto-assigned to team
+        // Also include explicit 'assigned' type for future compatibility
+        return isAutoAssigned || m.moduleType === 'assigned';
       })
-    : modules.filter((m: any) => m.moduleType === 'assigned' || (m.moduleType === 'personal' && m.autoAssignToNewUsers));
+    : modules.filter((m: any) => {
+        // For learners: show modules that are auto-assigned OR explicitly assigned type
+        const isAutoAssigned = m.autoAssignToNewUsers === true;
+        return isAutoAssigned || m.moduleType === 'assigned';
+      });
     
   const myModules = !isAdmin || !hasOrganization
-    ? modules.filter((m: any) => m.moduleType === 'personal' || m.createdById === user?.id)
+    ? modules.filter((m: any) => {
+        // Learners see their own modules (created by them) OR personal type modules
+        const isOwnModule = m.createdById === user?.id;
+        const isPersonalType = m.moduleType === 'personal';
+        const isNotAutoAssigned = m.autoAssignToNewUsers !== true;
+        // Include modules they created OR personal modules not auto-assigned
+        return isOwnModule || (isPersonalType && isNotAutoAssigned);
+      })
     : [];
 
   console.log('[Home] Classification results:');
