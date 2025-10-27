@@ -124,51 +124,27 @@ class LeaderboardTester:
             self.log_test_result(test_name, False, f"Exception: {str(e)}")
             return False
 
-    async def test_organization_users_endpoint(self):
-        """Test GET /api/proxy/organizations/{org_id}/users endpoint"""
+    async def test_leaderboard_timeframes(self):
+        """Test leaderboard endpoint with different timeframe parameters"""
+        timeframes = ["alltime", "week", "month"]
         
-        test_org_id = "test-org-123"
-        
-        # Test 1: Without authorization
-        test_name = "Org Users - No Auth (Expected 401)"
-        try:
-            response = await self.client.get(
-                f"{API_BASE}/proxy/organizations/{test_org_id}/users"
-            )
-            
-            # Backend returns 500 but logs show it's getting 200 OK from external API (empty response)
-            if response.status_code == 500 and "Expecting value" in response.text:
-                self.log_test(test_name, True, "Proxy working - external API returned empty response")
-            elif response.status_code == 401:
-                self.log_test(test_name, True, "Correctly returned 401 Unauthorized")
-            else:
-                self.log_test(test_name, False, 
-                            f"Expected 401 or 500 with JSON parse error, got {response.status_code}",
-                            {"response_text": response.text[:200]})
-        except Exception as e:
-            self.log_test(test_name, False, f"Request failed: {str(e)}")
-        
-        # Test 2: With authorization header
-        test_name = "Org Users - With Auth Header"
-        try:
-            headers = {"Authorization": "Bearer fake-jwt-token-for-testing"}
-            response = await self.client.get(
-                f"{API_BASE}/proxy/organizations/{test_org_id}/users",
-                headers=headers
-            )
-            
-            # Backend returns 500 but logs show it's getting 200 OK from external API (empty response)
-            if response.status_code == 500 and "Expecting value" in response.text:
-                self.log_test(test_name, True, "Proxy working - external API returned empty response")
-            elif response.status_code in [200, 401, 403, 404]:
-                self.log_test(test_name, True, 
-                            f"Proxy working, returned {response.status_code}")
-            else:
-                self.log_test(test_name, False, 
-                            f"Unexpected status code: {response.status_code}",
-                            {"response_text": response.text[:200]})
-        except Exception as e:
-            self.log_test(test_name, False, f"Request failed: {str(e)}")
+        for timeframe in timeframes:
+            test_name = f"Leaderboard timeframe: {timeframe}"
+            try:
+                response = await self.client.get(f"{API_BASE}/proxy/mobile/leaderboard?timeframe={timeframe}")
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    
+                    if "leaderboard" in data and isinstance(data["leaderboard"], list):
+                        self.log_test_result(test_name, True, f"Timeframe {timeframe} works, {len(data['leaderboard'])} entries")
+                    else:
+                        self.log_test_result(test_name, False, f"Invalid response structure for {timeframe}")
+                else:
+                    self.log_test_result(test_name, False, f"HTTP {response.status_code} for timeframe {timeframe}")
+                    
+            except Exception as e:
+                self.log_test_result(test_name, False, f"Exception with {timeframe}: {str(e)}")
 
     async def test_extract_text_endpoint(self):
         """Test POST /api/proxy/extract-text endpoint (existing functionality)"""
