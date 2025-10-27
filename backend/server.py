@@ -653,15 +653,24 @@ async def get_mobile_leaderboard(
                     timeout=10.0
                 )
                 logging.info(f"Leaderboard API response: {response.status_code}")
-                logging.info(f"Leaderboard response text: {response.text[:200]}")
+                logging.info(f"Leaderboard response text length: {len(response.text)}")
+                logging.info(f"Leaderboard response text preview: {response.text[:500]}")
                 
+                # Check if response is valid and not empty
                 if response.status_code == 200 and response.text.strip():
-                    leaderboard_data = response.json()
-                    if leaderboard_data.get("leaderboard") and len(leaderboard_data.get("leaderboard", [])) > 0:
-                        logging.info(f"Using web API leaderboard with {len(leaderboard_data.get('leaderboard', []))} entries")
-                        return JSONResponse(leaderboard_data)
+                    try:
+                        leaderboard_data = response.json()
+                        if leaderboard_data.get("leaderboard") and len(leaderboard_data.get("leaderboard", [])) > 0:
+                            logging.info(f"Using web API leaderboard with {len(leaderboard_data.get('leaderboard', []))} entries")
+                            return JSONResponse(leaderboard_data)
+                        else:
+                            logging.warning("Web API returned empty leaderboard array, falling back to local data")
+                    except Exception as json_error:
+                        logging.warning(f"Failed to parse web API leaderboard JSON: {json_error}, falling back to local data")
+                else:
+                    logging.warning(f"Web API returned empty or non-200 response (status: {response.status_code}), falling back to local data")
         except Exception as web_error:
-            logging.warning(f"Web API leaderboard failed: {web_error}")
+            logging.warning(f"Web API leaderboard request failed: {web_error}, falling back to local data")
         
         # Fallback: Build leaderboard from local MongoDB data
         logging.info("Building leaderboard from local data...")
