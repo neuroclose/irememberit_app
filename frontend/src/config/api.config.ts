@@ -1,14 +1,15 @@
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 
-// Use local proxy for web to bypass CORS, direct API for native
+// Use backend proxy for both web and native platforms
 const getBaseURL = () => {
   if (Platform.OS === 'web') {
-    // Use local backend proxy for web browsers
+    // Use relative path for web browsers
     return '/api/proxy';
   } else {
-    // Use direct API for native iOS/Android
-    return 'https://irememberit.replit.app/api';
+    // Use backend URL from environment for native iOS/Android
+    const backendUrl = Constants.expoConfig?.extra?.backendUrl || process.env.EXPO_PUBLIC_BACKEND_URL;
+    return `${backendUrl}/api/proxy`;
   }
 };
 
