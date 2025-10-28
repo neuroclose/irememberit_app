@@ -9,7 +9,7 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "autoIncrement": "buildNumber",
+      "buildNumber": "102",
       "supportsTablet": true,
       "bundleIdentifier": "com.neroclose.irememberit",
       "infoPlist": {
