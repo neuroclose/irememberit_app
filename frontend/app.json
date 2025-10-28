@@ -2,13 +2,14 @@
   "expo": {
     "name": "iRememberIT",
     "slug": "irememberit",
-    "version": "1.0.0",
+    "version": "2.1.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "irememberit",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
+      "autoIncrement": "buildNumber",
       "supportsTablet": true,
       "bundleIdentifier": "com.neroclose.irememberit",
       "infoPlist": {
