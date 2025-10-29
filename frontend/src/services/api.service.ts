@@ -4,6 +4,7 @@ import Constants from 'expo-constants';
 import { API_CONFIG } from '../config/api.config';
 import { StorageService } from './storage.service';
 import { useAuthStore } from '../store/auth.store';
+import { remoteLogger } from './remote-logger.service';
 
 class ApiService {
   private api: AxiosInstance;
