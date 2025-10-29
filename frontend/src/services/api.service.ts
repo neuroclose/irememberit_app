@@ -24,15 +24,39 @@ class ApiService {
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
+        
+        // Log API request
+        remoteLogger.logApiRequest(
+          config.url || '',
+          config.method?.toUpperCase() || 'GET',
+          config.data
+        );
+        
         return config;
       },
-      (error) => Promise.reject(error)
+      (error) => {
+        remoteLogger.logApiError('Request setup failed', error);
+        return Promise.reject(error);
+      }
     );
 
     // Response interceptor
     this.api.interceptors.response.use(
-      (response) => response,
+      (response) => {
+        // Log successful response
+        remoteLogger.logApiResponse(
+          response.config.url || '',
+          response.status,
+          response.data
+        );
+        return response;
+      },
       async (error: AxiosError) => {
+        // Log API error
+        remoteLogger.logApiError(
+          error.config?.url || 'Unknown',
+          error
+        );
         const originalRequest: any = error.config;
 
         // Don't try to refresh token for auth endpoints (login, signup, etc.)
