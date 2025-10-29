@@ -1406,6 +1406,39 @@ async def get_status_checks():
     status_checks = await db.status_checks.find().to_list(1000)
     return [StatusCheck(**status_check) for status_check in status_checks]
 
+# Remote logging endpoint
+@api_router.post("/logs")
+async def receive_logs(request: Request):
+    """Receive logs from mobile app for debugging"""
+    try:
+        body = await request.json()
+        logs = body.get("logs", [])
+        
+        # Log each entry
+        for log_entry in logs:
+            level = log_entry.get("level", "info")
+            message = log_entry.get("message", "")
+            context = log_entry.get("context", {})
+            timestamp = log_entry.get("timestamp", "")
+            
+            log_message = f"[MobileApp][{timestamp}] {message}"
+            
+            if level == "error":
+                logging.error(f"{log_message} | Context: {context}")
+            elif level == "warn":
+                logging.warning(f"{log_message} | Context: {context}")
+            else:
+                logging.info(f"{log_message} | Context: {context}")
+        
+        # Store in MongoDB for later analysis
+        if logs:
+            await db.mobile_logs.insert_many(logs)
+        
+        return {"status": "success", "received": len(logs)}
+    except Exception as e:
+        logging.error(f"Error receiving logs: {e}")
+        return {"status": "error", "message": str(e)}
+
 # Include the router in the main app
 app.include_router(api_router)
 
