@@ -2,7 +2,7 @@
   "expo": {
     "name": "iRememberIT",
     "slug": "irememberit",
-    "version": "1.0.0",
+    "version": "2.1.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "irememberit",
@@ -11,6 +11,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.neroclose.irememberitapp",
+      "buildNumber": "201",
       "infoPlist": {
         "NSMicrophoneUsageDescription": "This app needs access to your microphone for voice recording during learning sessions.",
         "NSSpeechRecognitionUsageDescription": "This app needs access to speech recognition for verbal learning modes.",
@@ -24,6 +25,7 @@
     },
     "android": {
       "package": "com.neroclose.irememberitapp",
+      "versionCode": 201,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#FF9F40"
