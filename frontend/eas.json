@@ -8,40 +8,31 @@
       "developmentClient": true,
       "distribution": "internal",
       "ios": {
-        "simulator": true,
-        "bundleIdentifier": "com.neroclose.irememberitapp"
+        "simulator": true
       },
       "android": {
-        "buildType": "apk",
-        "gradleCommand": ":app:assembleDebug"
+        "buildType": "apk"
       }
     },
     "preview": {
       "distribution": "internal",
-      "ios": {
-        "simulator": false,
-        "bundleIdentifier": "com.neroclose.irememberitapp"
-      },
       "android": {
         "buildType": "apk"
       }
     },
     "production": {
       "distribution": "store",
-      "ios": {
-        "bundleIdentifier": "com.neroclose.irememberitapp"
-      },
       "android": {
-        "buildType": "aab"
+        "buildType": "app-bundle"
       }
     }
   },
   "submit": {
     "production": {
       "ios": {
-        "appleId": "your-apple-id@example.com",
-        "ascAppId": "your-asc-app-id",
-        "appleTeamId": "your-team-id"
+        "appleId": "chris.abston@mail.com",
+        "ascAppId": "6754891284",
+        "appleTeamId": "HKGXJJC89T"
       },
       "android": {
         "serviceAccountKeyPath": "./path-to-service-account.json",
@@ -50,3 +41,4 @@
     }
   }
 }
+
