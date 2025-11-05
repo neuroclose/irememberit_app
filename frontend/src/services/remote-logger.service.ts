@@ -2,8 +2,18 @@
  * Remote Logging Service
  * Sends logs to backend for real-time debugging
  */
+import Constants from 'expo-constants';
+import { Platform } from 'react-native';
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'https://apiflow-doctor.preview.emergentagent.com';
+const getBackendUrl = () => {
+  if (Platform.OS === 'web') {
+    return '';
+  } else {
+    return Constants.expoConfig?.extra?.backendUrl || process.env.EXPO_PUBLIC_BACKEND_URL || '';
+  }
+};
+
+const BACKEND_URL = getBackendUrl();
 const LOG_ENDPOINT = `${BACKEND_URL}/api/logs`;
 
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
@@ -64,7 +74,7 @@ class RemoteLogger {
       message,
       context,
       deviceInfo: {
-        platform: 'ios', // Can be made dynamic
+        platform: Platform.OS,
         version: '1.0.0',
       },
     };

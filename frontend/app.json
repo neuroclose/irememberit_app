@@ -41,7 +41,7 @@
       "typedRoutes": true
     },
     "extra": {
-      "backendUrl": "https://apiflow-doctor.preview.emergentagent.com"
+      "backendUrl": "https://touchupui.preview.emergentagent.com"
     }
   }
 }
