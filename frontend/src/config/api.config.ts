@@ -9,7 +9,15 @@ const getBaseURL = () => {
   } else {
     // Use backend URL from environment for native iOS/Android
     const backendUrl = Constants.expoConfig?.extra?.backendUrl || process.env.EXPO_PUBLIC_BACKEND_URL;
-    return `${backendUrl}/api/proxy`;
+    const baseUrl = `${backendUrl}/api/proxy`;
+    
+    // Log for debugging
+    console.log('[API_CONFIG] Platform:', Platform.OS);
+    console.log('[API_CONFIG] backendUrl from expoConfig:', Constants.expoConfig?.extra?.backendUrl);
+    console.log('[API_CONFIG] backendUrl from env:', process.env.EXPO_PUBLIC_BACKEND_URL);
+    console.log('[API_CONFIG] Final baseURL:', baseUrl);
+    
+    return baseUrl;
   }
 };
 
