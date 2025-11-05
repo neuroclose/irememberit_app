@@ -3,7 +3,7 @@
  * Sends logs to backend for real-time debugging
  */
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'https://touchupui.preview.emergentagent.com';
+const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'https://apiflow-doctor.preview.emergentagent.com';
 const LOG_ENDPOINT = `${BACKEND_URL}/api/logs`;
 
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';

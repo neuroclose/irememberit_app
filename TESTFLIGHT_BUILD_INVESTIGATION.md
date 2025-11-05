@@ -85,7 +85,7 @@ Check your build configuration:
 1. What value did you use for `extra.backendUrl` in app.json when building?
 2. What value is in EXPO_PUBLIC_BACKEND_URL in your build environment?
 
-**Expected:** `https://touchupui.preview.emergentagent.com`
+**Expected:** `https://apiflow-doctor.preview.emergentagent.com`
 **If it's anything else:** That's why the fixes aren't working
 
 ---
@@ -119,7 +119,7 @@ I've added a comprehensive remote logging system that will send logs from your i
 
 1. **Check app.json in your build**
    - Look at `extra.backendUrl` field
-   - Should be: `https://touchupui.preview.emergentagent.com`
+   - Should be: `https://apiflow-doctor.preview.emergentagent.com`
 
 2. **Check API config in your build**
    - Look at `src/config/api.config.ts`

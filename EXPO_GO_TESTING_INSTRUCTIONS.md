@@ -7,21 +7,21 @@ All settings have been verified and are correctly configured for Expo Go testing
 ### 1. Frontend API Configuration ✅
 **File:** `/app/frontend/src/config/api.config.ts`
 - **Web:** Uses `/api/proxy` (relative path)
-- **iOS/Android:** Uses `https://touchupui.preview.emergentagent.com/api/proxy`
+- **iOS/Android:** Uses `https://apiflow-doctor.preview.emergentagent.com/api/proxy`
 - **Source:** `Constants.expoConfig.extra.backendUrl` and `process.env.EXPO_PUBLIC_BACKEND_URL`
 
 ### 2. Environment Variables ✅
 **File:** `/app/frontend/.env`
 ```
-EXPO_PUBLIC_BACKEND_URL=https://touchupui.preview.emergentagent.com
-EXPO_PACKAGER_HOSTNAME=https://touchupui.preview.emergentagent.com
+EXPO_PUBLIC_BACKEND_URL=https://apiflow-doctor.preview.emergentagent.com
+EXPO_PACKAGER_HOSTNAME=https://apiflow-doctor.preview.emergentagent.com
 ```
 
 ### 3. App Configuration ✅
 **File:** `/app/frontend/app.json`
 ```json
 "extra": {
-  "backendUrl": "https://touchupui.preview.emergentagent.com"
+  "backendUrl": "https://apiflow-doctor.preview.emergentagent.com"
 }
 ```
 
@@ -94,7 +94,7 @@ EXPO_PACKAGER_HOSTNAME=https://touchupui.preview.emergentagent.com
 If issues persist, shake your device and tap "Show Developer Menu" → "Debug Remote JS" to see console logs.
 
 ### Look for these log messages:
-- `[API] Fetching from: https://touchupui.preview.emergentagent.com/api/proxy/...`
+- `[API] Fetching from: https://apiflow-doctor.preview.emergentagent.com/api/proxy/...`
 - `[Leaderboard] Fetching leaderboard data...`
 - `[Announcements] Marking announcement as read...`
 

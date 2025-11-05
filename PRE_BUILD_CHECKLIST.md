@@ -23,7 +23,7 @@ return `${backendUrl}/api/proxy`;
 ✅ Backend URL configured in `extra` field:
 ```json
 "extra": {
-  "backendUrl": "https://touchupui.preview.emergentagent.com"
+  "backendUrl": "https://apiflow-doctor.preview.emergentagent.com"
 }
 ```
 
@@ -40,7 +40,7 @@ return `${backendUrl}/api/proxy`;
 ### 3. Environment Variables ✅
 **File:** `/app/frontend/.env`
 
-✅ Backend URL: `https://touchupui.preview.emergentagent.com`
+✅ Backend URL: `https://apiflow-doctor.preview.emergentagent.com`
 ✅ Stripe publishable key configured
 ✅ All required Expo variables present
 
@@ -87,7 +87,7 @@ return `${backendUrl}/api/proxy`;
 
 #### Fix #1: iOS API Routing
 **Before:** iOS → `https://irememberit.replit.app/api` (direct, broken)
-**After:** iOS → `https://touchupui.preview.emergentagent.com/api/proxy` (via backend)
+**After:** iOS → `https://apiflow-doctor.preview.emergentagent.com/api/proxy` (via backend)
 
 **Fixes:**
 - ✅ Leaderboard loading
