@@ -66,7 +66,7 @@
     "extra": {
       "backendUrl": "https://touchupui.preview.emergentagent.com",
       "eas": {
-        "projectId": "your-project-id"
+        "projectId": "db8648e3-f14b-40d4-a8b0-680c57cb1e6b"
       }
     },
     "notification": {
