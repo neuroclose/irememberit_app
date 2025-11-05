@@ -10,19 +10,32 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.neroclose.irememberit",
+      "bundleIdentifier": "com.neroclose.irememberitapp",
       "infoPlist": {
         "NSMicrophoneUsageDescription": "This app needs access to your microphone for voice recording during learning sessions.",
-        "NSSpeechRecognitionUsageDescription": "This app needs access to speech recognition for verbal learning modes."
+        "NSSpeechRecognitionUsageDescription": "This app needs access to speech recognition for verbal learning modes.",
+        "NSCameraUsageDescription": "This app needs access to your camera to scan documents and capture images for learning materials.",
+        "NSPhotoLibraryUsageDescription": "This app needs access to your photo library to select images for learning materials.",
+        "NSPhotoLibraryAddUsageDescription": "This app needs permission to save images to your photo library.",
+        "UIBackgroundModes": [
+          "remote-notification"
+        ]
       }
     },
     "android": {
-      "package": "com.neroclose.irememberit",
+      "package": "com.neroclose.irememberitapp",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#FF9F40"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "RECORD_AUDIO",
+        "NOTIFICATIONS"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -35,13 +48,30 @@
       "backgroundColor": "#1a1d29"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/icon.png",
+          "color": "#ffffff",
+          "sounds": []
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
     },
     "extra": {
-      "backendUrl": "https://touchupui.preview.emergentagent.com"
+      "backendUrl": "https://touchupui.preview.emergentagent.com",
+      "eas": {
+        "projectId": "your-project-id"
+      }
+    },
+    "notification": {
+      "icon": "./assets/images/icon.png",
+      "color": "#6366f1",
+      "androidMode": "default",
+      "androidCollapsedTitle": "New notification"
     }
   }
 }
